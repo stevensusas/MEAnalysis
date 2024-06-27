@@ -1,0 +1,13 @@
+Package: Korb-MEA
+Type: Package
+Title: Korb-MEA
+Version: 0.1.0
+Author: Steven Su
+Maintainer: Steven Su <hanqisu@sas.upenn.edu>
+Description: A MEA analysis tool for Korb Lab internal use.
+License: GPL-3
+Imports:
+    readr,
+    tidyr,
+    dplyr,
+    ggplot2

@@ -3,6 +3,8 @@ library(readr)
 library(tidyr)
 library(dplyr)
 library(ggplot2)
+library(gridExtra)
+library(roxygen2)
 
 # Read the CSV file with more robust parsing
 df <- read_csv("/Users/stevensu/Desktop/Korb Lab/MEA Analysis/Emily's Files/052124_DIV18_baseline(000)(000).csv")
@@ -47,16 +49,30 @@ new_df_sample_assignments <- df_sample_assignments %>%
   separate(`Investigator:`, into = paste0("V", 1:max(lengths(strsplit(
     df_sample_assignments$`Investigator:`, ",")))), sep = ",", fill = "right")
 
+
+new_df_sample_assignments <- as.data.frame(new_df_sample_assignments)
+
+rownames(new_df_sample_assignments) <- new_df_sample_assignments[, 1]
+
+new_df_sample_assignments <- new_df_sample_assignments[, -1]
+
+colnames(new_df_sample_assignments) <- new_df_sample_assignments[1, ]
+
+new_df_sample_assignments <- new_df_sample_assignments[-1, ]
+
 return(new_df_sample_assignments)
 
 }
 
+
 df_sample_assigments <- find_sample_assignments(df)
+
+
 
 find_treatment_averages <- function(df) {
 
   start_row <- find_first_occurrence(df, "Treatment Averages")
-  end_row <- find_first_occurrence(df, "Well Averages")
+  end_row <- find_first_occurrence(df, "Well Averages") - 1
   
   df_treatment_averages <- subset_by_range(df, start_row, end_row)
   
@@ -66,6 +82,17 @@ find_treatment_averages <- function(df) {
   
   new_df_treatment_averages <- new_df_treatment_averages %>%
     select_if(~ all(!is.na(.)))
+  
+  new_df_treatment_averages <- as.data.frame(new_df_treatment_averages)
+  
+  rownames(new_df_treatment_averages) <- new_df_treatment_averages[, 1]
+  
+  new_df_treatment_averages <- new_df_treatment_averages[, -1]
+  
+  colnames(new_df_treatment_averages) <- new_df_treatment_averages[1, ]
+  
+  new_df_treatment_averages <- new_df_treatment_averages[-1, ]
+  
   
   return(new_df_treatment_averages)
   
@@ -84,6 +111,16 @@ find_well_averages <- function(df) {
     separate(`Investigator:`, into = paste0("V", 1:max(lengths(strsplit(
       df_well_averages$`Investigator:`, ",")))), sep = ",", fill = "right")
   
+  new_df_well_averages <- as.data.frame(new_df_well_averages)
+  
+  rownames(new_df_well_averages) <- new_df_well_averages[, 1]
+  
+  new_df_well_averages <- new_df_well_averages[, -1]
+  
+  colnames(new_df_well_averages) <- new_df_well_averages[1, ]
+  
+  new_df_well_averages <- new_df_well_averages[-1, ]
+  
   return(new_df_well_averages)
   
 }
@@ -92,7 +129,7 @@ df_well_averages <- find_well_averages(df)
 
 
 get_treatment_list <- function(df) {
-  treatment_row <- df_sample_assigments[df$V1 == 'Treatment', ]
+  treatment_row <- df_sample_assigments['Treatment', ]
   
   # Print the specific row
   specific_row_array <- as.vector(unlist(treatment_row))
@@ -117,6 +154,16 @@ find_electrode_averages <- function(df) {
   new_df_electrode_averages <- df_electrode_averages %>%
     separate(`Investigator:`, into = paste0("V", 1:max(lengths(strsplit(
       df_electrode_averages$`Investigator:`, ",")))), sep = ",", fill = "right")
+  
+  new_df_electrode_averages <- as.data.frame(new_df_electrode_averages)
+  
+  rownames(new_df_electrode_averages) <- new_df_electrode_averages[, 1]
+  
+  new_df_electrode_averages <- new_df_electrode_averages[, -1]
+  
+  colnames(new_df_electrode_averages) <- new_df_electrode_averages[1, ]
+  
+  new_df_electrode_averages <- new_df_electrode_averages[-1, ]
   
   return(new_df_electrode_averages)
   
@@ -176,10 +223,10 @@ combined_metrics_plot <- function(df, samples) {
   samples <- get_treatment_list(samples)
   
   # Extract data for spikes count
-  spikes_count_averages <- as.numeric(df[3, ])
-  spikes_count_std <- as.numeric(df[4, ])
-  spikes_count_averages <- spikes_count_averages[-1]
-  spikes_count_std <- spikes_count_std[-1]
+  spikes_count_averages <- as.numeric(df[2, ])
+  spikes_count_std <- as.numeric(df[3, ])
+  #spikes_count_averages <- spikes_count_averages[-1]
+  #spikes_count_std <- spikes_count_std[-1]
   
   spikes_data <- data.frame(
     Sample = samples,
@@ -189,10 +236,10 @@ combined_metrics_plot <- function(df, samples) {
   )
   
   # Extract data for mean firing rate
-  mean_firing_rate <- as.numeric(df[5, ])
-  mean_firing_std <- as.numeric(df[6, ])
-  mean_firing_rate <- mean_firing_rate[-1]
-  mean_firing_std <- mean_firing_std[-1]
+  mean_firing_rate <- as.numeric(df[4, ])
+  mean_firing_std <- as.numeric(df[5, ])
+  #mean_firing_rate <- mean_firing_rate[-1]
+  #mean_firing_std <- mean_firing_std[-1]
   
   mean_firing_rate <- na.omit(mean_firing_rate)
   mean_firing_std <- na.omit(mean_firing_std)
@@ -225,10 +272,19 @@ combined_metrics_plot <- function(df, samples) {
       strip.text = element_text(size = 12, face = "bold"),
       panel.border = element_blank(),
       axis.line = element_line(size = 1)
+
     )
 }
 
 combined_metrics_plot(df_treatment_averages, df_sample_assigments)
+
+treatment_averages_plot <- function(df) {
+
+i = 3
+j = 1
+
+
+while (i < 49)
 
 metrics <- c(
   "Number of Spikes - Avg",
@@ -285,38 +341,68 @@ metrics_clean <- gsub(" - Avg.*| - Std.*", "", metrics)
 # Remove duplicates
 metrics_unique <- unique(metrics_clean)
 
-treatment_averages_plot <- function(df) {
-  
   for (metric in metrics_unique) {
-    
-  }
-  
-  i = 3
-  
-  while (i < 49)
-    
+
   samples <- get_treatment_list(df_sample_assigments)
-  mean_firing_rate <- as.numeric(df[i, ])
-  mean_firing_std <- as.numeric(df[i+1,])
-  mean_firing_rate <- mean_firing_rate[-1]
-  mean_firing_std <- mean_firing_std[-1]
+  metric1 <- as.numeric(df[i, ])
+  metric_std1 <- as.numeric(df[i+1,])
+
+  metric1 <- na.omit(metric)
   
-  mean_firing_rate <- na.omit(mean_firing_rate)
+  metric2 <- as.numeric(df[i, ])
+  metric_std2 <- as.numeric(df[i+1,])
   
+  metric3 <- na.omit(metric)
+  
+  metric3 <- as.numeric(df[i, ])
+  metric_std3 <- as.numeric(df[i+1,])
+  
+  metric4 <- na.omit(metric)
+  
+  metric4 <- as.numeric(df[i, ])
+  metric_std4 <- as.numeric(df[i+1,])
+  
+  metric5 <- na.omit(metric)
+  
+  metric1 <- as.numeric(df[i, ])
+  metric_std1 <- as.numeric(df[i+1,])
+  
+  metric1 <- na.omit(metric)
+
   # Convert to a numeric vector (na.omit returns a "na.omit" class object)
-  mean_firing_rate <- as.vector(mean_firing_rate)
-  mean_firing_std <- na.omit(mean_firing_std)
-  
+  metric <- as.vector(metric)
+  metric_std <- na.omit(metric_std)
+
   # Convert to a numeric vector (na.omit returns a "na.omit" class object)
-  mean_firing_std <- as.vector(mean_firing_std)
-  
-  plot_data <- data.frame(Sample = samples, Avg = mean_firing_rate, Std = mean_firing_std)
-  
+  metric_std <- as.vector(metric_std)
+
+  plot_data <- data.frame(Sample = samples, Avg = metric, Std = metric_std)
+
   # Create the bar plot with error bars
-  ggplot(plot_data, aes(x = Sample, y = Avg, fill = Sample)) +
-    geom_bar(stat = "identity", position = "dodge") +
-    geom_errorbar(aes(ymin = Avg - Std, ymax = Avg + Std), width = 0.2, position = position_dodge(0.9)) +
-    theme_minimal() +
-    labs(title = "Mean Firing Rate by Sample", x = "Sample", y = "Mean Firing Rate (Hz ± Std)")
+  assign(paste("plot", j, sep = ''), 
+         ggplot(combined_data, aes(x = Sample, y = Avg)) +
+           geom_bar(stat = "identity", position = "dodge", fill = "grey80", color = "black", size = 1) +
+           geom_errorbar(aes(ymin = Avg - Std, ymax = Avg + Std), width = 0.2, position = position_dodge(0.9), color = "black", size = 1) +
+           theme_classic() +
+           labs(title = "Metrics by Sample", x = "Sample", y = "Value") +
+           facet_wrap(~ Metric, ncol = 1, scales = "free_y") +
+           theme(
+             legend.position = "none",
+             plot.title = element_text(size = 14, face = "bold"),
+             axis.title.x = element_text(size = 12),
+             axis.title.y = element_text(size = 12),
+             axis.text.x = element_text(size = 10, angle = 45, hjust = 1),
+             axis.text.y = element_text(size = 10),
+             strip.background = element_blank(),
+             strip.text = element_text(size = 12, face = "bold"),
+             panel.border = element_blank(),
+             axis.line = element_line(size = 1))
+)
   
+i = i + 2
+j = j + 1
+
+  }
+
+treatment_averages_plot(df_treatment_averages)
 }
