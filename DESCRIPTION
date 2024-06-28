@@ -1,13 +1,23 @@
 Package: Korb-MEA
 Type: Package
-Title: Korb-MEA
+Title: Korb-MEA: A MEA Analysis Tool for Korb Lab
 Version: 0.1.0
-Author: Steven Su
+Authors@R: 
+    person(given = "Steven",
+           family = "Su",
+           role = c("aut", "cre"),
+           email = "hanqisu@sas.upenn.edu")
 Maintainer: Steven Su <hanqisu@sas.upenn.edu>
-Description: A MEA analysis tool for Korb Lab internal use.
+Description: A MEA (Microelectrode Array) analysis tool for internal use in the Korb Lab.
 License: GPL-3
+Encoding: UTF-8
+LazyData: true
 Imports:
     readr,
     tidyr,
     dplyr,
-    ggplot2
+    ggplot2,
+    gridExtra,
+    roxygen2,
+    ggpubr
+RoxygenNote: 7.3.1

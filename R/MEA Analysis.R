@@ -10,7 +10,7 @@ library(ggpubr)
 # Read the CSV file with more robust parsing
 df <- read_csv("/Users/stevensu/Desktop/Korb Lab/MEA Analysis/Emily's Files/052124_DIV18_baseline(000)(000).csv")
 
-# Define the function to find the first occurrence of a substring
+# Helper: Define the function to find the first occurrence of a substring
 find_first_occurrence <- function(df, substring_to_find) {
   # Convert the dataframe to a character vector (combine all columns into one string per row)
   df_char <- apply(df, 1, paste, collapse = " ")
@@ -26,7 +26,7 @@ find_first_occurrence <- function(df, substring_to_find) {
   }
 }
 
-# Define the function to subset the dataframe by range
+# Helper: Define the function to subset the dataframe by range
 subset_by_range <- function(df, start_row, end_row) {
   # Ensure the start_row and end_row are within the valid range
   if (start_row < 1 || end_row > nrow(df) || start_row > end_row) {
@@ -38,6 +38,7 @@ subset_by_range <- function(df, start_row, end_row) {
   return(subset_df)
 }
 
+# Helper: Find sample assignments
 find_sample_assignments <- function(df) {
   # Use the functions to find the relevant rows and subset the dataframe
   start_row <- find_first_occurrence(df, "Well Information") + 1
@@ -50,28 +51,21 @@ find_sample_assignments <- function(df) {
     separate(`Investigator:`, into = paste0("V", 1:max(lengths(strsplit(
       df_sample_assignments$`Investigator:`, ",")))), sep = ",", fill = "right")
   
-  
   new_df_sample_assignments <- as.data.frame(new_df_sample_assignments)
-  
   rownames(new_df_sample_assignments) <- new_df_sample_assignments[, 1]
-  
   new_df_sample_assignments <- new_df_sample_assignments[, -1]
-  
   colnames(new_df_sample_assignments) <- new_df_sample_assignments[1, ]
-  
   new_df_sample_assignments <- new_df_sample_assignments[-1, ]
   
   return(new_df_sample_assignments)
-  
 }
 
-
-df_sample_assigments <- find_sample_assignments(df)
-
-
-
+#' Find treatment averages
+#'
+#' @param df A dataframe containing the data.
+#' @return A dataframe of treatment averages.
+#' @export
 find_treatment_averages <- function(df) {
-  
   start_row <- find_first_occurrence(df, "Treatment Averages")
   end_row <- find_first_occurrence(df, "Well Averages") - 1
   
@@ -85,24 +79,20 @@ find_treatment_averages <- function(df) {
     select_if(~ all(!is.na(.)))
   
   new_df_treatment_averages <- as.data.frame(new_df_treatment_averages)
-  
   rownames(new_df_treatment_averages) <- new_df_treatment_averages[, 1]
-  
   new_df_treatment_averages <- new_df_treatment_averages[, -1]
-  
   colnames(new_df_treatment_averages) <- new_df_treatment_averages[1, ]
-  
   new_df_treatment_averages <- new_df_treatment_averages[-1, ]
   
-  
   return(new_df_treatment_averages)
-  
 }
 
-df_treatment_averages <- find_treatment_averages(df)
-
+#' Find well averages
+#'
+#' @param df A dataframe containing the data.
+#' @return A dataframe of well averages.
+#' @export
 find_well_averages <- function(df) {
-  
   start_row <- find_first_occurrence(df, "Well Averages")
   end_row <- find_first_occurrence(df, "Measurement") - 1
   
@@ -113,40 +103,20 @@ find_well_averages <- function(df) {
       df_well_averages$`Investigator:`, ",")))), sep = ",", fill = "right")
   
   new_df_well_averages <- as.data.frame(new_df_well_averages)
-  
   rownames(new_df_well_averages) <- new_df_well_averages[, 1]
-  
   new_df_well_averages <- new_df_well_averages[, -1]
-  
   colnames(new_df_well_averages) <- new_df_well_averages[1, ]
-  
   new_df_well_averages <- new_df_well_averages[-1, ]
   
   return(new_df_well_averages)
-  
 }
 
-df_well_averages <- find_well_averages(df)
-
-
-get_treatment_list <- function(df) {
-  treatment_row <- df_sample_assigments['Treatment', ]
-  
-  # Print the specific row
-  specific_row_array <- as.vector(unlist(treatment_row))
-  
-  treatment_array <- unique(na.omit(specific_row_array))
-  
-  treatment_array <- treatment_array[treatment_array != ""]
-  
-  treatment_array <- treatment_array[treatment_array != "Treatment"]
-  
-  return(treatment_array)
-}
-
-
+#' Find electrode averages
+#'
+#' @param df A dataframe containing the data.
+#' @return A dataframe of electrode averages.
+#' @export
 find_electrode_averages <- function(df) {
-  
   start_row <- find_first_occurrence(df, "Measurement")
   end_row <- nrow(df)
   
@@ -157,23 +127,20 @@ find_electrode_averages <- function(df) {
       df_electrode_averages$`Investigator:`, ",")))), sep = ",", fill = "right")
   
   new_df_electrode_averages <- as.data.frame(new_df_electrode_averages)
-  
   rownames(new_df_electrode_averages) <- new_df_electrode_averages[, 1]
-  
   new_df_electrode_averages <- new_df_electrode_averages[, -1]
-  
   colnames(new_df_electrode_averages) <- new_df_electrode_averages[1, ]
-  
   new_df_electrode_averages <- new_df_electrode_averages[-1, ]
   
   return(new_df_electrode_averages)
-  
 }
 
-df_electrode_average <- find_electrode_averages(df)
-
+#' Plot spikes count treatment averages
+#'
+#' @param df A dataframe containing the data.
+#' @return A ggplot object displaying spikes count treatment averages.
+#' @export
 spikes_count_treatment_average <- function(df) {
-  
   samples <- get_treatment_list(df_sample_assigments)
   spikes_count_averages <- as.numeric(df[3, ])
   spikes_count_std <- as.numeric(df[4,])
@@ -190,7 +157,11 @@ spikes_count_treatment_average <- function(df) {
     labs(title = "Number of Spikes by Sample", x = "Sample", y = "Number of Spikes (Avg ± Std)")
 }
 
-
+#' Plot mean firing rate treatment averages
+#'
+#' @param df A dataframe containing the data.
+#' @return A ggplot object displaying mean firing rate treatment averages.
+#' @export
 mean_firing_rate_treatment_average <- function(df) {
   samples <- get_treatment_list(df_sample_assigments)
   mean_firing_rate <- as.numeric(df[5, ])
@@ -215,47 +186,15 @@ mean_firing_rate_treatment_average <- function(df) {
     geom_errorbar(aes(ymin = Avg - Std, ymax = Avg + Std), width = 0.2, position = position_dodge(0.9)) +
     theme_minimal() +
     labs(title = "Mean Firing Rate by Sample", x = "Sample", y = "Mean Firing Rate (Hz ± Std)")
-  
 }
 
-create_combined_plot <- function(df, metrics, samples) {
-  combined_data <- data.frame()
-  for (i in seq(1, length(metrics), 2)) {
-    if (i + 1 <= length(metrics)) {
-      metric_avg <- as.numeric(df[metrics[i], ])
-      metric_std <- as.numeric(df[metrics[i + 1], ])
-      metric_name <- gsub(" - Avg| - Std", "", metrics[i])
-      plot_data <- data.frame(Sample = samples, Avg = metric_avg, Std = metric_std, Metric = metric_name)
-      combined_data <- rbind(combined_data, plot_data)
-    }
-  }
-  
-  # Reverse the order of the metrics
-  metrics <- rev(metrics)
-  ggplot(combined_data, aes(x = Sample, y = Avg, fill = Sample)) +
-    geom_bar(stat = "identity", position = "dodge", fill = "grey80", color = "black", size = 1) +
-    geom_errorbar(aes(ymin = Avg - Std, ymax = Avg + Std), width = 0.2, position = position_dodge(0.9), color = "black", size = 1) +
-    theme_classic() +
-    
-    labs(title = "Metrics by Sample", x = "Sample", y = "Value") + 
-    theme(
-      legend.position = "none",
-      plot.title = element_text(size = 9.8, face = "bold"), # Original size 14 * 0.7
-      axis.title.x = element_text(size = 8.4), # Original size 12 * 0.7
-      axis.title.y = element_text(size = 8.4), # Original size 12 * 0.7
-      axis.text.x = element_text(size = 7, angle = 45, hjust = 1), # Original size 10 * 0.7
-      axis.text.y = element_text(size = 7), # Original size 10 * 0.7
-      strip.background = element_blank(),
-      strip.text = element_text(size = 8.4, face = "bold"), # Original size 12 * 0.7
-      panel.border = element_blank(),
-      axis.line = element_line(size = 1)
-    ) +
-    facet_wrap(~ Metric, ncol = 6, nrow = 4, scales = "free_y")
-}
-
+#' Plot treatment averages
+#'
+#' @param df A dataframe containing the treatment averages data.
+#' @return A ggplot object displaying treatment averages.
+#' @export
 treatment_averages_plot <- function(df) {
   samples <- get_treatment_list(df_sample_assigments)
-  
   metrics <- c(
     "Number of Spikes - Avg",
     "Number of Spikes - Std",
@@ -308,9 +247,12 @@ treatment_averages_plot <- function(df) {
   create_combined_plot(df, metrics, samples)
 }
 
-treatment_averages_plot(df_treatment_averages)
-
-# Function to perform t-tests between control and treatment groups for each metric
+#' Perform t-tests on treatment averages
+#'
+#' @param df A dataframe containing the treatment averages data.
+#' @param control_group A character string specifying the control group.
+#' @return A dataframe of t-test results.
+#' @export
 perform_t_tests <- function(df, control_group) {
   metrics <- c(
     "Number of Spikes - Avg",
@@ -396,48 +338,11 @@ perform_t_tests <- function(df, control_group) {
   return(results)
 }
 
-# Perform t-tests and display results
-t_test_results <- perform_t_tests(df_treatment_averages, "WT control")
-print(t_test_results)
-
-create_combined_t_test_plot <- function(df, metrics, samples, t_test_results) {
-  combined_data <- data.frame()
-  for (i in seq(1, length(metrics), 2)) {
-    if (i + 1 <= length(metrics)) {
-      metric_avg <- as.numeric(df[metrics[i], ])
-      metric_std <- as.numeric(df[metrics[i + 1], ])
-      metric_name <- gsub(" - Avg| - Std", "", metrics[i])
-      plot_data <- data.frame(Sample = samples, Avg = metric_avg, Std = metric_std, Metric = metric_name)
-      combined_data <- rbind(combined_data, plot_data)
-    }
-  }
-  
-  # Merge with t-test results
-  combined_data <- merge(combined_data, t_test_results, by.x = c("Sample", "Metric"), by.y = c("Treatment", "Metric"), all.x = TRUE)
-  
-  # Reverse the order of the metrics
-  metrics <- rev(metrics)
-  ggplot(combined_data, aes(x = Sample, y = Avg, fill = Sample)) +
-    geom_bar(stat = "identity", position = "dodge", fill = "grey80", color = "black", size = 1) +
-    geom_errorbar(aes(ymin = Avg - Std, ymax = Avg + Std), width = 0.2, position = position_dodge(0.9), color = "black", size = 1) +
-    geom_text(aes(y = Avg + Std, label = ifelse(Sample != "WT control", round(P.Value, 3), "")), vjust = -1, position = position_dodge(0.9), size = 2.1) +
-    theme_classic() +
-    labs(x = "", y = "") + 
-    theme(
-      legend.position = "none",
-      plot.title = element_text(size = 9.8, face = "bold"), # Original size 14 * 0.7
-      axis.title.x = element_text(size = 8.4), # Original size 12 * 0.7
-      axis.title.y = element_text(size = 8.4), # Original size 12 * 0.7
-      axis.text.x = element_text(size = 7, angle = 45, hjust = 1), # Original size 10 * 0.7
-      axis.text.y = element_text(size = 7), # Original size 10 * 0.7
-      strip.background = element_blank(),
-      strip.text = element_text(size = 8.4, face = "bold"), # Original size 12 * 0.7
-      panel.border = element_blank(),
-      axis.line = element_line(size = 1)
-    ) +
-    facet_wrap(~ Metric, ncol = 6, nrow = 4, scales = "free_y")
-}
-
+#' Plot treatment averages with t-test results
+#'
+#' @param df A dataframe containing the treatment averages data.
+#' @return A ggplot object displaying treatment averages with t-test results.
+#' @export
 treatment_averages_t_test_plot <- function(df) {
   samples <- get_treatment_list(df_sample_assigments)
   metrics <- c(
@@ -494,3 +399,7 @@ treatment_averages_t_test_plot <- function(df) {
 
 # Call the plotting function
 treatment_averages_t_test_plot(df_treatment_averages)
+
+library(devtools)
+devtools::document()
+devtools::check()
