@@ -224,8 +224,13 @@ create_combined_plot <- function(df, metrics, samples) {
     if (i + 1 <= length(metrics)) {
       metric_avg <- as.numeric(df[metrics[i], ])
       metric_std <- as.numeric(df[metrics[i + 1], ])
+      
+      metric_avg <- as.vector(metric_avg)
+      metric_std <- as.vector(metric_std)
+      
       metric_name <- gsub(" - Avg| - Std", "", metrics[i])
-      plot_data <- data.frame(Sample = samples, Avg = metric_avg, Std = metric_std, Metric = metric_name)
+      plot_data <- data.frame(Sample = colnames(df), Avg = metric_avg, Std = metric_std, Metric = metric_name)
+      plot_data$Sample <- factor(plot_data$Sample, levels = unique(plot_data$Sample))
       combined_data <- rbind(combined_data, plot_data)
     }
   }
@@ -389,13 +394,13 @@ perform_t_tests <- function(df, control_group) {
       }
     }
   }
-  
+  print(results)
   return(results)
 }
 
 # Perform t-tests and display results
-t_test_results <- perform_t_tests(df_treatment_averages, "WT control")
-print(t_test_results)
+#t_test_results <- perform_t_tests(df_treatment_averages, "WT control")
+#print(t_test_results)
 
 #Helper
 create_combined_t_test_plot <- function(df, metrics, samples, t_test_results) {
@@ -404,21 +409,35 @@ create_combined_t_test_plot <- function(df, metrics, samples, t_test_results) {
     if (i + 1 <= length(metrics)) {
       metric_avg <- as.numeric(df[metrics[i], ])
       metric_std <- as.numeric(df[metrics[i + 1], ])
+      
+      metric_avg <- as.vector(metric_avg)
+      metric_std <- as.vector(metric_std)
+      
       metric_name <- gsub(" - Avg| - Std", "", metrics[i])
-      plot_data <- data.frame(Sample = samples, Avg = metric_avg, Std = metric_std, Metric = metric_name)
+      
+      plot_data <- data.frame(Sample = colnames(df), Avg = metric_avg, Std = metric_std, Metric = metric_name)
+      
+      plot_data$Sample <- factor(plot_data$Sample, levels = unique(plot_data$Sample))
       combined_data <- rbind(combined_data, plot_data)
+      
     }
   }
   
   # Merge with t-test results
   combined_data <- merge(combined_data, t_test_results, by.x = c("Sample", "Metric"), by.y = c("Treatment", "Metric"), all.x = TRUE)
+  print(combined_data)
+  
+  combined_data$Sample <- factor(combined_data$Sample, levels = c("NEG Control-WT", setdiff(unique(combined_data$Sample), "NEG Control-WT")))
+  
+  combined_data <- combined_data %>% filter(Sample %in% c('NEG Control-HET', 'NEG Control-WT'))
+  
   
   # Reverse the order of the metrics
   metrics <- rev(metrics)
-  ggplot(combined_data, aes(x = Sample, y = Avg, fill = Sample)) +
+  p<- ggplot(combined_data, aes(x = Sample, y = Avg, fill = Sample)) +
     geom_bar(stat = "identity", position = "dodge", fill = "grey80", color = "black", size = 1) +
     geom_errorbar(aes(ymin = Avg - Std, ymax = Avg + Std), width = 0.2, position = position_dodge(0.9), color = "black", size = 1) +
-    geom_text(aes(y = Avg + Std, label = ifelse(Sample != "WT control", round(P.Value, 3), "")), vjust = -1, position = position_dodge(0.9), size = 2.1) +
+    geom_text(aes(y = Avg + Std, label = ifelse(Sample != "NEG Control-WT", round(P.Value, 3), "")), vjust = -1, position = position_dodge(0.9), size = 2.1) +
     theme_classic() +
     labs(x = "", y = "") + 
     theme(
@@ -434,10 +453,12 @@ create_combined_t_test_plot <- function(df, metrics, samples, t_test_results) {
       axis.line = element_line(size = 1)
     ) +
     facet_wrap(~ Metric, ncol = 6, nrow = 4, scales = "free_y")
+  print(p)
+  return(p)
 }
 
-treatment_averages_t_test_plot <- function(df) {
-  samples <- get_treatment_list(df_sample_assigments)
+samples <- get_treatment_list(df_sample_assigments)
+treatment_averages_t_test_plot <- function(df, samples) {
   metrics <- c(
     "Number of Spikes - Avg",
     "Number of Spikes - Std",
@@ -487,7 +508,8 @@ treatment_averages_t_test_plot <- function(df) {
     "Weighted Mean Resistance - Std (kΩ)"
   )
   
-  create_combined_t_test_plot(df, metrics, samples, t_test_results)
+  
+  return(create_combined_t_test_plot(df, metrics, samples, t_test_results))
 }
 
 # Call the plotting function
