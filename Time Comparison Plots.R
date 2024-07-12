@@ -3,6 +3,10 @@ library(ggplot2)
 library(dplyr)
 library(patchwork)
 
+
+# Trajectory: 5 min, 30 min, 60 min...
+
+
 df1 <- read_csv('/Users/stevensu/Desktop/Korb Lab/MEA Analysis/Steven_MEA/ra nxn and Sean 6-4-24/Plate 1/6-04-24 nxn DIV 11 PLATE 1(002)(000).csv')
 
 df1_treatment_averages <- find_treatment_averages(df1)

@@ -68,7 +68,17 @@ find_sample_assignments <- function(df) {
 
 df_sample_assigments <- find_sample_assignments(df)
 
-
+#' Find Treatment Averages
+#'
+#' This function extracts the treatment averages from the given dataframe.
+#'
+#' @param df The raw dataframe
+#' @return The treatment averages dataframe.
+#' @export
+#' @examples
+#' # Example usage:
+#' df <- read_csv("path/to/csv")
+#' treatment_averages <- find_treatment_averages(df)
 find_treatment_averages <- function(df) {
   
   start_row <- find_first_occurrence(df, "Treatment Averages")
@@ -100,7 +110,17 @@ find_treatment_averages <- function(df) {
 
 df_treatment_averages <- find_treatment_averages(df)
 
-
+#' Find Well Averages
+#'
+#' This function extracts the well averages from the given dataframe.
+#'
+#' @param df The raw dataframe
+#' @return The well averages dataframe.
+#' @export
+#' @examples
+#' # Example usage:
+#' df <- read_csv("path/to/csv")
+#' well_averages <- find_well_averages(df)
 find_well_averages <- function(df) {
   
   start_row <- find_first_occurrence(df, "Well Averages")
@@ -146,7 +166,17 @@ get_treatment_list <- function(df_samples) {
   return(treatment_array)
 }
 
-
+#' Find Electrode Averages
+#'
+#' This function extracts the Electrode averages from the given dataframe.
+#'
+#' @param df The raw dataframe
+#' @return The electrode averages dataframe.
+#' @export
+#' @examples
+#' # Example usage:
+#' df <- read_csv("path/to/csv")
+#' electrode_averages <- find_electrode_averages(df)
 find_electrode_averages <- function(df) {
 
   start_row <- find_first_occurrence(df, "Measurement")
@@ -257,6 +287,7 @@ create_combined_plot <- function(df, metrics, samples) {
     ) +
     facet_wrap(~ Metric, ncol = 6, nrow = 4, scales = "free_y")
 }
+
 
 treatment_averages_plot <- function(df) {
   samples <- get_treatment_list(df_sample_assigments)
@@ -403,7 +434,7 @@ perform_t_tests <- function(df, control_group) {
 #print(t_test_results)
 
 #Helper
-create_combined_t_test_plot <- function(df, metrics, samples, t_test_results) {
+create_combined_t_test_plot <- function(df, metrics, samples, t_test_results, controll, groups_omit) {
   combined_data <- data.frame()
   for (i in seq(1, length(metrics), 2)) {
     if (i + 1 <= length(metrics)) {
@@ -427,17 +458,17 @@ create_combined_t_test_plot <- function(df, metrics, samples, t_test_results) {
   combined_data <- merge(combined_data, t_test_results, by.x = c("Sample", "Metric"), by.y = c("Treatment", "Metric"), all.x = TRUE)
   print(combined_data)
   
-  combined_data$Sample <- factor(combined_data$Sample, levels = c("NEG Control-WT", setdiff(unique(combined_data$Sample), "NEG Control-WT")))
+  combined_data$Sample <- factor(combined_data$Sample, levels = c(controll, setdiff(unique(combined_data$Sample), controll)))
   
-  combined_data <- combined_data %>% filter(Sample %in% c('NEG Control-HET', 'NEG Control-WT'))
+  combined_data <- combined_data %>% filter(!Sample %in% groups_omit)
   
   
   # Reverse the order of the metrics
   metrics <- rev(metrics)
   p<- ggplot(combined_data, aes(x = Sample, y = Avg, fill = Sample)) +
-    geom_bar(stat = "identity", position = "dodge", fill = "grey80", color = "black", size = 1) +
-    geom_errorbar(aes(ymin = Avg - Std, ymax = Avg + Std), width = 0.2, position = position_dodge(0.9), color = "black", size = 1) +
-    geom_text(aes(y = Avg + Std, label = ifelse(Sample != "NEG Control-WT", round(P.Value, 3), "")), vjust = -1, position = position_dodge(0.9), size = 2.1) +
+    geom_bar(stat = "identity", position = "dodge", fill = "grey80", color = "black", size = 0.5) +
+    geom_errorbar(aes(ymin = Avg - Std, ymax = Avg + Std), width = 0.2, position = position_dodge(0.9), color = "black", size = 0.5) +
+    geom_text(aes(y = Avg + Std, label = ifelse(Sample != controll, round(P.Value, 3), "")), vjust = -1, position = position_dodge(0.9), size = 2.1) +
     theme_classic() +
     labs(x = "", y = "") + 
     theme(
@@ -457,8 +488,25 @@ create_combined_t_test_plot <- function(df, metrics, samples, t_test_results) {
   return(p)
 }
 
-samples <- get_treatment_list(df_sample_assigments)
-treatment_averages_t_test_plot <- function(df, samples) {
+
+
+#' Find Treatment Averages
+#'
+#' This function extracts the treatment averages from the given dataframe.
+#'
+#' @param df The raw dataframe
+#' @param controll String specifying the controll group
+#' @param groups_omit Array specifying groups to omit from the plot
+#' @return Visualized treatment averages plot with T test results.
+#' @export
+#' @examples
+#' # Example usage:
+#' df <- read_csv("path/to/csv")
+#' print(treatment_averages_t_test_plot(df, "WT-controll", c("HET1", "HET2", HET3"))
+#' 
+treatment_averages_t_test_plot <- function(df, controll, groups_omit) {
+  samples <- get_treatment_list(find_sample_assignments(df))
+  df = find_treatment_averages(df)
   metrics <- c(
     "Number of Spikes - Avg",
     "Number of Spikes - Std",
@@ -509,7 +557,7 @@ treatment_averages_t_test_plot <- function(df, samples) {
   )
   
   
-  return(create_combined_t_test_plot(df, metrics, samples, t_test_results))
+  return(create_combined_t_test_plot(df, metrics, samples, t_test_results, controll, groups_omit))
 }
 
 # Call the plotting function
