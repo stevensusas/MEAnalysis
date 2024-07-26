@@ -1,67 +1,114 @@
-source("/Users/stevensu/Desktop/Korb Lab/MEA Analysis/Korb-MEA/R/MEA Analysis.R")
+# Load required libraries
 library(ggplot2)
 library(dplyr)
 library(patchwork)
+library(readr)
+library(stringr)
 
+# Source the MEA Analysis functions
+source("/Users/stevensu/Desktop/Korb Lab/MEA Analysis/Korb-MEA/MEA Analysis.R")
 
-# Trajectory: 5 min, 30 min, 60 min...
+# Function to process a single file
+process_file <- function(file_path, metric) {
+  df <- read_csv(file_path)
+  treatment_averages <- find_treatment_averages(df)
 
+  avg_col <- paste0(metric, " - Avg")
+  std_col <- paste0(metric, " - Std")
 
-df1 <- read_csv('/Users/stevensu/Desktop/Korb Lab/MEA Analysis/Steven_MEA/ra nxn and Sean 6-4-24/Plate 1/6-04-24 nxn DIV 11 PLATE 1(002)(000).csv')
+  if (avg_col %in% rownames(treatment_averages) && std_col %in% rownames(treatment_averages)) {
+    data.frame(
+      Sample = colnames(treatment_averages),
+      Avg = as.numeric(treatment_averages[avg_col, ]),
+      Std = as.numeric(treatment_averages[std_col, ]),
+      FileName = basename(file_path)
+    )
+  } else {
+    NULL
+  }
+}
 
-df1_treatment_averages <- find_treatment_averages(df1)
+# Function to plot time comparison for multiple conditions
+time_comparison_plots <- function(data_list, conditions, metric) {
+  # Combine all dataframes
+  combined_df <- bind_rows(data_list)
 
-df1_sample_assignments <- find_sample_assignments(df1)
+  # Filter for the specified conditions
+  filtered_df <- combined_df %>% filter(Sample %in% conditions)
 
-df1_samples <- get_treatment_list(df1_sample_assignments)
-
-print(df1_treatment_averages)
-
-mean_firing_rate_treatment_average(df1_treatment_averages)
-
-
-df2 <- read_csv('/Users/stevensu/Desktop/Korb Lab/MEA Analysis/Steven_MEA/ra nxn and Sean 6-5-24/Plate 1/6-05-24 nxn DIV 12 PLATE 1(001)(000).csv')
-
-df2_treatment_averages <- find_treatment_averages(df2)
-
-df2_sample_assignments <- find_sample_assignments(df2)
-
-df2_samples <- get_treatment_list(df2_sample_assignments)
-
-print(df2_treatment_averages)
-
-print(mean_firing_rate_treatment_average(df2_treatment_averages))
-
-
-# Updated function to create two separate plots using faceting
-time_comparison_plots <- function(time1_df, time2_df, control, treatment) {
-  # Add a column to each dataframe to indicate the time point
-  time1_df <- time1_df %>% mutate(Time = "Time1")
-  time2_df <- time2_df %>% mutate(Time = "Time2")
-  
-  # Combine the two dataframes
-  combined_df <- bind_rows(time1_df, time2_df)
-  
-  # Filter for the specified control and treatment
-  filtered_df <- combined_df %>% filter(Sample %in% c(control, treatment))
-  
-  # Add a Condition column to distinguish between control and treatment
-  filtered_df <- filtered_df %>%
-    mutate(Condition = case_when(
-      Sample == control ~ control,
-      Sample == treatment ~ treatment
-    ))
-  
   # Create the plot using facet_wrap
-  p <- ggplot(filtered_df, aes(x = Time, y = Avg, fill = Time)) +
-    geom_bar(stat = "identity", position = "dodge") +
-    geom_errorbar(aes(ymin = Avg - Std, ymax = Avg + Std), width = 0.2, position = position_dodge(0.9)) +
-    theme_minimal() +
-    labs(x = "Time Point", y = "Mean Firing Rate (Hz) (Avg ± Std)") +
-    facet_wrap(~ Condition, ncol = 1, )
-  
+  p <- ggplot(filtered_df, aes(x = FileName, y = Avg, fill = Sample)) +
+    geom_bar(stat = "identity", position = "dodge", fill = "grey80", color = "black", size = 0.5) +
+    geom_errorbar(aes(ymin = Avg - Std, ymax = Avg + Std), width = 0.2, position = position_dodge(0.9), color = "black", size = 0.5) +
+    theme_classic() +
+    labs(x = "", y = metric) +
+    theme(
+      legend.position = "none",
+      plot.title = element_text(size = 9.8, face = "bold"),
+      axis.title.x = element_text(size = 8.4),
+      axis.title.y = element_text(size = 8.4),
+      axis.text.x = element_text(size = 7, angle = 45, hjust = 1),
+      axis.text.y = element_text(size = 7),
+      strip.background = element_blank(),
+      strip.text = element_text(size = 8.4, face = "bold"),
+      panel.border = element_blank(),
+      axis.line = element_line(size = 1)
+    ) +
+    facet_wrap(~ Sample, ncol = 1, scales = "free_y")
+
+  print(p)
   return(p)
 }
 
-plot <- time_comparison_plots(mean_firing_rate_treatment_average(df1_treatment_averages), mean_firing_rate_treatment_average(df2_treatment_averages), "NEG Control-HET", "NEG Control-WT")
-print(plot)
+# Main function to run the analysis
+run_mea_analysis <- function(file_paths, conditions, metric) {
+  # Process all files
+  data_list <- lapply(file_paths, function(path) process_file(path, metric))
+
+  # Remove any NULL entries (in case the metric wasn't found in some files)
+  data_list <- data_list[!sapply(data_list, is.null)]
+
+  # Generate and print the plot
+  plot <- time_comparison_plots(data_list, conditions, metric)
+  print(plot)
+}
+
+# Example usage:
+file_paths <- c('/Users/stevensu/Desktop/Korb Lab/MEA Analysis/Steven_MEA/ra nxn and Sean 6-4-24/Plate 1/6-04-24 nxn DIV 11 PLATE 1(002)(001).csv',
+                '/Users/stevensu/Desktop/Korb Lab/MEA Analysis/Steven_MEA/ra nxn and Sean 6-5-24/Plate 1/6-05-24 nxn DIV 12 PLATE 1(001)(001).csv',
+                '/Users/stevensu/Desktop/Korb Lab/MEA Analysis/Steven_MEA/ra nxn and Sean 6-6-24/Plate 1/6-06-24 nxn DIV 13 PLATE 1(000)(001).csv',
+                '/Users/stevensu/Desktop/Korb Lab/MEA Analysis/Steven_MEA/ra nxn and Sean 6-7-24/Plate 1/div 14 nxn 6-7-24 plate 1(000)(000).csv',
+
+                '/Users/stevensu/Desktop/Korb Lab/MEA Analysis/Steven_MEA/ra nxn and Sean 6-8-24/Plate 1/ra nxn div 15 plate 1(000)(000).csv',
+
+                '/Users/stevensu/Desktop/Korb Lab/MEA Analysis/Steven_MEA/ra nxn and Sean 6-9-24/Plate 1/ra nxn div 16 plate 1(003)(000).csv',
+
+                '/Users/stevensu/Desktop/Korb Lab/MEA Analysis/Steven_MEA/ra nxn and Sean 6-10-24/Plate 1/ra nxn div 17 plate1 spontaneous(001)(000).csv',
+
+                '/Users/stevensu/Desktop/Korb Lab/MEA Analysis/Steven_MEA/ra nxn and Sean 6-11-24/Plate 1/ra nxn div 18 plate 1 spontaneous 20min(000)(000).csv',
+                '/Users/stevensu/Desktop/Korb Lab/MEA Analysis/Steven_MEA/ra nxn and Sean 6-11-24/Plate 1/ra nxn div 18 plate 1 spontaneous 30min(000)(000).csv',
+
+                '/Users/stevensu/Desktop/Korb Lab/MEA Analysis/Steven_MEA/ra nxn and Sean 6-13-24 DIV 20/Plate 1/ra nxn div 20 plate1 spontaneous 5min(000)(000).csv',
+                '/Users/stevensu/Desktop/Korb Lab/MEA Analysis/Steven_MEA/ra nxn and Sean 6-13-24 DIV 20/Plate 1/ra nxn div 20 plate1 spontaneous 30min(000)(000).csv',
+                '/Users/stevensu/Desktop/Korb Lab/MEA Analysis/Steven_MEA/ra nxn and Sean 6-13-24 DIV 20/Plate 1/ra nxn div 20 plate1 spontaneous 60min(000)(000).csv',
+
+                '/Users/stevensu/Desktop/Korb Lab/MEA Analysis/Steven_MEA/ra nxn and Sean 6-14-24 DIV 21/Plate 1/ra nxn div 21 spontaneous 5min(000)(000).csv',
+                '/Users/stevensu/Desktop/Korb Lab/MEA Analysis/Steven_MEA/ra nxn and Sean 6-14-24 DIV 21/Plate 1/ra nxn div 21 spontaneous 30min(000)(000).csv',
+                '/Users/stevensu/Desktop/Korb Lab/MEA Analysis/Steven_MEA/ra nxn and Sean 6-14-24 DIV 21/Plate 1/ra nxn div 21 spontaneous 50min(000)(000).csv',
+                '/Users/stevensu/Desktop/Korb Lab/MEA Analysis/Steven_MEA/ra nxn and Sean 6-15-24 DIV 22/Plate 1/ra nxn div 22 plate1 spontaneous 30min(000)(000).csv',
+                '/Users/stevensu/Desktop/Korb Lab/MEA Analysis/Steven_MEA/ra nxn and Sean 6-15-24 DIV 22/Plate 1/ra nxn div 22 plate1 spontaneous(000)(000).csv',
+                '/Users/stevensu/Desktop/Korb Lab/MEA Analysis/Steven_MEA/ra nxn and Sean 6-15-24 DIV 22/Plate 1/ra nxn div 22 plate1spontaneaous 60min(000)(000).csv',
+                '/Users/stevensu/Desktop/Korb Lab/MEA Analysis/Steven_MEA/ra nxn and Sean 6-17-24/Plate 1/ra nxn plate1cspontaneous 5min(000)(000).csv',
+                '/Users/stevensu/Desktop/Korb Lab/MEA Analysis/Steven_MEA/ra nxn and Sean 6-17-24/Plate 1/ra nxn plate1cspontaneous 30min(000)(000).csv',
+                '/Users/stevensu/Desktop/Korb Lab/MEA Analysis/Steven_MEA/ra nxn and Sean 6-17-24/Plate 1/ra nxn plate1cspontaneous 30min(001)(000).csv',
+                '/Users/stevensu/Desktop/Korb Lab/MEA Analysis/Steven_MEA/ra nxn and Sean 6-18-24 div 25/Plate 1/ra nxn plate1cspontaneous 5min(000)(000).csv',
+                '/Users/stevensu/Desktop/Korb Lab/MEA Analysis/Steven_MEA/ra nxn and Sean 6-18-24 div 25/Plate 1/ra nxn plate1cspontaneous 30min(000)(000).csv',
+                '/Users/stevensu/Desktop/Korb Lab/MEA Analysis/Steven_MEA/ra nxn and Sean 6-18-24 div 25/Plate 1/ra nxn plate1cspontaneous 30min(001)(000).csv'
+)
+
+conditions <- c("Luciferase-HET", "NEG Control-WT", "Luciferase-WT")
+
+# Specify the metric you want to analyze
+metric <- "Mean Firing Rate (Hz)"
+
+run_mea_analysis(file_paths, conditions, metric)
