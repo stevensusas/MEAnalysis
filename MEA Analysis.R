@@ -394,7 +394,14 @@ perform_t_tests <- function(df, control_group) {
     "Weighted Mean Resistance - Std (kΩ)"
   )
 
-  results <- data.frame(Metric = character(), Treatment = character(), P.Value = numeric(), stringsAsFactors = FALSE)
+  results <- data.frame(
+    Metric = character(),
+    Treatment = character(),
+    P.Value = numeric(),
+    Control_Mean = numeric(),
+    Treatment_Mean = numeric(),
+    stringsAsFactors = FALSE
+  )
 
   all_groups <- names(df)
   treatment_groups <- all_groups[all_groups != control_group]
@@ -408,7 +415,6 @@ perform_t_tests <- function(df, control_group) {
       for (treatment in treatment_groups) {
         treatment_mean <- as.numeric(df[metrics[i], treatment])
         treatment_sd <- as.numeric(df[metrics[i + 1], treatment])
-
         n <- strtoi(df["Total Wells", treatment])
 
         # Calculate standard error
@@ -421,10 +427,18 @@ perform_t_tests <- function(df, control_group) {
         p_value <- 2 * pt(-abs(t_stat), df = df_ttest)
 
         # Store the result
-        results <- rbind(results, data.frame(Metric = metric_name, Treatment = treatment, P.Value = p_value, stringsAsFactors = FALSE))
+        results <- rbind(results, data.frame(
+          Metric = metric_name,
+          Treatment = treatment,
+          P.Value = p_value,
+          Control_Mean = control_mean,
+          Treatment_Mean = treatment_mean,
+          stringsAsFactors = FALSE
+        ))
       }
     }
   }
+
   print(results)
   return(results)
 }
@@ -560,6 +574,7 @@ treatment_averages_t_test_plot <- function(df, controll, groups_omit) {
   return(create_combined_t_test_plot(df, metrics, samples, t_test_results, controll, groups_omit))
 }
 
+
 # Call the plotting function
 #treatment_averages_t_test_plot(df_treatment_averages)
 generate_significance_table <- function(file_list, control_group, groups_to_omit = c(), metric_to_filter = NULL) {
@@ -573,36 +588,33 @@ generate_significance_table <- function(file_list, control_group, groups_to_omit
     tryCatch({
       df <- read_csv(file, show_col_types = FALSE)
       df_treatment_averages <- find_treatment_averages(df)
-
       # Get all sample groups
       samples <- get_treatment_list(find_sample_assignments(df))
-
       # Remove groups to omit
       samples_to_analyze <- setdiff(samples, groups_to_omit)
-
       # Subset df_treatment_averages to only include samples we want to analyze
       df_treatment_averages <- df_treatment_averages[, c(control_group, samples_to_analyze)]
-
       t_test_results <- perform_t_tests(df_treatment_averages, control_group)
+
+      # Check if required columns exist
+      required_cols <- c("Treatment", "Metric", "P.Value", "Control_Mean", "Treatment_Mean")
+      missing_cols <- setdiff(required_cols, names(t_test_results))
+      if (length(missing_cols) > 0) {
+        stop(paste("Missing required columns:", paste(missing_cols, collapse = ", ")))
+      }
 
       extract_filename <- function(file_path) {
         # Split the path by slashes
         parts <- strsplit(file_path, "/")[[1]]
-
         # Get everything after the 7th slash
         relevant_part <- paste(parts[(8:length(parts))], collapse = "/")
-
         # Remove the file extension
         filename <- sub("\\.csv$", "", relevant_part)
-
         return(filename)
       }
-
       file_name <- extract_filename(file)
-
       # Add file name to results
       t_test_results$File <- file_name
-
       return(t_test_results)
     }, error = function(e) {
       warning(paste("Error processing file", file, ":", e$message))
@@ -613,11 +625,29 @@ generate_significance_table <- function(file_list, control_group, groups_to_omit
   # Process all files
   all_results <- map_df(file_list, process_file)
 
-  # Create the significance table
+  # Check if all_results is empty
+  if (nrow(all_results) == 0) {
+    stop("No valid results were obtained from any of the input files.")
+  }
+
+  # Create the significance table with new significance levels and directional indicators
   significance_table <- all_results %>%
-    mutate(Significance = ifelse(P.Value < 0.05, "*", NA)) %>%
-    select(File, Treatment, Metric, Significance) %>%
-    pivot_wider(names_from = File, values_from = Significance) %>%
+    mutate(Significance = case_when(
+      P.Value < 0.05 & Treatment_Mean > Control_Mean ~ "***",
+      P.Value < 0.08 & Treatment_Mean > Control_Mean ~ "**",
+      P.Value < 0.2 & Treatment_Mean > Control_Mean ~ "*",
+      P.Value < 0.05 & Treatment_Mean < Control_Mean ~ "-***",
+      P.Value < 0.08 & Treatment_Mean < Control_Mean ~ "-**",
+      P.Value < 0.2 & Treatment_Mean < Control_Mean ~ "-*",
+      TRUE ~ NA_character_
+    )) %>%
+    mutate(Mean_Difference = Treatment_Mean - Control_Mean) %>%
+    select(File, Treatment, Metric, Significance, Control_Mean, Treatment_Mean, Mean_Difference) %>%
+    pivot_wider(
+      names_from = File,
+      values_from = c(Significance, Control_Mean, Treatment_Mean, Mean_Difference),
+      names_glue = "{File}_{.value}"
+    ) %>%
     arrange(Treatment, Metric)
 
   # Filter by specific metric if provided, otherwise return all metrics
