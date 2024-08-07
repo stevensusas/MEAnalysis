@@ -122,6 +122,7 @@ time_comparison_plots <- function(data_list, conditions, metric) {
   return(p)
 }
 
+
 # Main function to run the analysis
 run_mea_analysis <- function(file_paths, conditions, metric) {
   # Process all files
@@ -208,9 +209,9 @@ file_path_3 <- c(
   "/Users/stevensu/Desktop/Korb Lab/MEA Analysis/Steven_MEA/ra nxn and Sean 6-18-24 div 25/Plate 3/ra nxn plate3 spontaneous 35min(000)(000).csv"
 )
 
-#conditions <- c("ASH1L-HET", "CHD8-HET", "DNMT3A-HET", "KDM6B-HET", "KMT2C-HET", "Luciferase-HET", "MBD5-HET", "MED13L-HET", "NSD1-HET", "SETD5-HET", "TBR1-HET")
+conditions <- c("ASH1L-HET", "CHD8-HET", "DNMT3A-HET", "KDM6B-HET", "KMT2C-HET", "Luciferase-HET", "MBD5-HET", "MED13L-HET", "NSD1-HET", "SETD5-HET", "TBR1-HET")
 
-conditions <- c("U", "NEG Control-HET")
+#conditions <- c("U", "NEG Control-HET")
 
 # Specify the metric you want to analyze
 metric <- "Number of Bursts"
