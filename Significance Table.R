@@ -8,6 +8,8 @@ library(tools)
 #Challenge2: dealing with sample assignment names
 
 #focus on Plate 1 for now
+# Hard-coded filename mapping for plate1
+
 
 plate1 <-c('/Users/stevensu/Desktop/Korb Lab/MEA Analysis/Steven_MEA/ra nxn and Sean 6-4-24/Plate 1/6-04-24 nxn DIV 11 PLATE 1(002)(001).csv',
          '/Users/stevensu/Desktop/Korb Lab/MEA Analysis/Steven_MEA/ra nxn and Sean 6-5-24/Plate 1/6-05-24 nxn DIV 12 PLATE 1(001)(001).csv',
@@ -145,11 +147,11 @@ groups_to_omit <- get_strings_ending_with_HET_and_NEG_WT_and_short(get_treatment
 specific_metric <- "Mean Firing Rate (Hz)"
 
 # Generate the significance table
-significance_table <- generate_significance_table(plate3, control_group, groups_to_omit)
+significance_table <- generate_significance_table(plate3, control_group, groups_to_omit, specific_metric)
 
 # View the table
 print(significance_table)
 
-setwd('/Users/stevensu/Desktop/Korb Lab/MEA Analysis/Steven_MEA/Results')
+#setwd('/Users/stevensu/Desktop/Korb Lab/MEA Analysis/Steven_MEA/Results')
 
-write.csv(significance_table, file = "Plate 3 Luc HET vs Depletion HET Sig Table.csv", row.names = FALSE)
+#write.csv(significance_table, file = "Plate 3 Luc HET vs Depletion HET Sig Table.csv", row.names = FALSE)

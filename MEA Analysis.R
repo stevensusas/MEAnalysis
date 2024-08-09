@@ -574,6 +574,73 @@ treatment_averages_t_test_plot <- function(df, controll, groups_omit) {
   return(create_combined_t_test_plot(df, metrics, samples, t_test_results, controll, groups_omit))
 }
 
+plate1_mapping <- c(
+  "6-04-24 nxn DIV 11 PLATE 1(002)(001).csv" = "DIV11",
+  "6-05-24 nxn DIV 12 PLATE 1(001)(001).csv" = "DIV12",
+  "6-06-24 nxn DIV 13 PLATE 1(000)(001).csv" = "DIV13",
+  "div 14 nxn 6-7-24 plate 1(000)(000).csv" = "DIV14",
+  "ra nxn div 15 plate 1(000)(000).csv" = "DIV15",
+  "ra nxn div 16 plate 1(003)(000).csv" = "DIV16",
+  "ra nxn div 17 plate1 spontaneous(001)(000).csv" = "DIV17",
+  "ra nxn div 18 plate 1 spontaneous 20min(000)(000).csv" = "DIV18_20min",
+  "ra nxn div 18 plate 1 spontaneous 30min(000)(000).csv" = "DIV18_30min",
+  "ra nxn div 20 plate1 spontaneous 5min(000)(000).csv" = "DIV20_5min",
+  "ra nxn div 20 plate1 spontaneous 30min(000)(000).csv" = "DIV20_30min",
+  "ra nxn div 20 plate1 spontaneous 60min(000)(000).csv" = "DIV20_60min",
+  "ra nxn div 21 spontaneous 5min(000)(000).csv" = "DIV21_5min",
+  "ra nxn div 21 spontaneous 30min(000)(000).csv" = "DIV21_30min",
+  "ra nxn div 21 spontaneous 50min(000)(000).csv" = "DIV21_50min",
+  "ra nxn div 22 plate1 spontaneous 30min(000)(000).csv" = "DIV22_30min_1",
+  "ra nxn div 22 plate1 spontaneous(000)(000).csv" = "DIV22",
+  "ra nxn div 22 plate1spontaneaous 60min(000)(000).csv" = "DIV22_60min",
+  "ra nxn plate1cspontaneous 5min(000)(000).csv" = "DIV24_5min",
+  "ra nxn plate1cspontaneous 30min(000)(000).csv" = "DIV24_30min_1",
+  "ra nxn plate1cspontaneous 30min(001)(000).csv" = "DIV24_30min_2",
+  "ra nxn plate1cspontaneous 5min(000)(000).csv" = "DIV25_5min",
+  "ra nxn plate1cspontaneous 30min(000)(000).csv" = "DIV25_30min_1",
+  "ra nxn plate1cspontaneous 30min(001)(000).csv" = "DIV25_30min_2"
+)
+
+# Hard-coded filename mapping for plate3
+plate3_mapping <- c(
+  "6-04-24 nxn DIV 11 PLATE 3(001)(000).csv" = "DIV11_1",
+  "6-04-24 nxn DIV 11 PLATE 3(001)(001).csv" = "DIV11_2",
+  "6-05-24 nxn DIV 12 PLATE 3(000)(000).csv" = "DIV12_1",
+  "6-05-24 nxn DIV 12 PLATE 3(000)(001).csv" = "DIV12_2",
+  "6-06-24 nxn DIV 13 PLATE 3(000)(000).csv" = "DIV13_1",
+  "6-06-24 nxn DIV 13 PLATE 3(000)(001).csv" = "DIV13_2",
+  "div 14 nxn 6-7-24 plate 3(000)(000).csv" = "DIV14",
+  "ra nxn div 15 plate 3(002)(000).csv" = "DIV15",
+  "ra nxn div 16 plate 3(000)(000).csv" = "DIV16_1",
+  "ra nxn div 16 plate 3(001)(000).csv" = "DIV16_2",
+  "ra nxn div 17 plate3 spontaneous 30min in(000)(000).csv" = "DIV17_30min_1",
+  "ra nxn div 17 plate3 spontaneous 30min in(001)(000).csv" = "DIV17_30min_2",
+  "ra nxn div 18 plate 3 broadband30min(000)(000).csv" = "DIV18_30min_BB",
+  "ra nxn div 18 plate 3 field potential 30min(000)(000).csv" = "DIV18_30min_FP",
+  "ra nxn div 18 plate 3 spontaeous 3 30min(000)(000).csv" = "DIV18_30min_3",
+  "ra nxn div 18 plate 3 spontaeous 25 min(000)(000).csv" = "DIV18_25min",
+  "ra nxn div 18 plate 3 spontaneou 5 min(001)(000).csv" = "DIV18_5min",
+  "ra nxn div 20 plate3 field potential 30min(000)(000).csv" = "DIV20_30min_FP",
+  "ra nxn div 20 plate3 spontaneous 5min(000)(000).csv" = "DIV20_5min",
+  "ra nxn div 20 plate3 spontaneous 30min(000)(000).csv" = "DIV20_30min",
+  "ra nxn div 20 plate3 spontaneous 60min(000)(000).csv" = "DIV20_60min",
+  "ra nxn div 21 plate 3 field potential 30min(000)(000).csv" = "DIV21_30min_FP",
+  "ra nxn div 21 plate 3 spontaneous 5min(000)(000).csv" = "DIV21_5min",
+  "ra nxn div 21 plate 3 spontaneous 30min(000)(000).csv" = "DIV21_30min_1",
+  "ra nxn div 21 plate 3 spontaneous 30min(001)(000).csv" = "DIV21_30min_2",
+  "ra nxn div 22 plate3 field potential 30min(000)(000).csv" = "DIV22_30min_FP",
+  "ra nxn div 22 plate3 spontaneaous 5min(000)(000).csv" = "DIV22_5min_1",
+  "ra nxn div 22 plate3 spontaneaous 5min(001)(000).csv" = "DIV22_5min_2",
+  "ra nxn div 22 plate3 spontaneaous 30min(000)(000).csv" = "DIV22_30min",
+  "ra nxn plate3 field potential 30min(001)(000).csv" = "DIV24_30min_FP",
+  "ra nxn plate3 spontaneous 5min(000)(000).csv" = "DIV24_5min",
+  "ra nxn plate3 spontaneous 30min(000)(000).csv" = "DIV24_30min",
+  "ra nxn plate3 spontaneous 35min(000)(000).csv" = "DIV24_35min",
+  "ra nxn plate3 field potential 30min(001)(000).csv" = "DIV25_30min_FP",
+  "ra nxn plate3 spontaneous 5min(000)(000).csv" = "DIV25_5min",
+  "ra nxn plate3 spontaneous 30min(000)(000).csv" = "DIV25_30min",
+  "ra nxn plate3 spontaneous 35min(000)(000).csv" = "DIV25_35min"
+)
 
 # Call the plotting function
 #treatment_averages_t_test_plot(df_treatment_averages)
@@ -582,6 +649,8 @@ generate_significance_table <- function(file_list, control_group, groups_to_omit
   library(tidyr)
   library(purrr)
   library(readr)
+  library(ggplot2)
+  library(scales)
 
   # Function to process a single file
   process_file <- function(file) {
@@ -632,32 +701,72 @@ generate_significance_table <- function(file_list, control_group, groups_to_omit
 
   # Create the significance table with new significance levels and directional indicators
   significance_table <- all_results %>%
-    mutate(Significance = case_when(
-      P.Value < 0.05 & Treatment_Mean > Control_Mean ~ "***",
-      P.Value < 0.08 & Treatment_Mean > Control_Mean ~ "**",
-      P.Value < 0.2 & Treatment_Mean > Control_Mean ~ "*",
-      P.Value < 0.05 & Treatment_Mean < Control_Mean ~ "-***",
-      P.Value < 0.08 & Treatment_Mean < Control_Mean ~ "-**",
-      P.Value < 0.2 & Treatment_Mean < Control_Mean ~ "-*",
-      TRUE ~ NA_character_
-    )) %>%
+    mutate(
+      Significance = case_when(
+        P.Value < 0.05 & Treatment_Mean > Control_Mean ~ "***",
+        P.Value < 0.08 & Treatment_Mean > Control_Mean ~ "**",
+        P.Value < 0.2 & Treatment_Mean > Control_Mean ~ "*",
+        P.Value < 0.05 & Treatment_Mean < Control_Mean ~ "-***",
+        P.Value < 0.08 & Treatment_Mean < Control_Mean ~ "-**",
+        P.Value < 0.2 & Treatment_Mean < Control_Mean ~ "-*",
+        TRUE ~ NA_character_
+      ),
+      Heat = -log10(P.Value) * sign(Treatment_Mean - Control_Mean)
+    ) %>%
     mutate(Mean_Difference = Treatment_Mean - Control_Mean) %>%
-    select(File, Treatment, Metric, Significance, Control_Mean, Treatment_Mean, Mean_Difference) %>%
+    select(File, Treatment, Metric, Significance, Heat, Control_Mean, Treatment_Mean, Mean_Difference) %>%
     pivot_wider(
       names_from = File,
-      values_from = c(Significance, Control_Mean, Treatment_Mean, Mean_Difference),
+      values_from = c(Significance, Heat, Control_Mean, Treatment_Mean, Mean_Difference),
       names_glue = "{File}_{.value}"
     ) %>%
     arrange(Treatment, Metric)
 
-  # Filter by specific metric if provided, otherwise return all metrics
+  # Filter by specific metric if provided
   if (!is.null(metric_to_filter)) {
     significance_table <- significance_table %>%
       filter(Metric == metric_to_filter)
   } else {
-    # If no metric is specified, return all metrics (no filtering)
     message("No specific metric provided. Returning results for all metrics.")
   }
 
+  # Prepare data for heatmap
+  heatmap_data <- significance_table %>%
+    pivot_longer(
+      cols = contains("_Heat"),
+      names_to = "File",
+      values_to = "Heat"
+    ) %>%
+    mutate(
+      File = sub("_Heat$", "", File),
+      Heat = as.numeric(Heat)
+    )
+
+  # Create heatmap
+  heatmap <- ggplot(heatmap_data, aes(x = File, y = paste(Treatment, Metric), fill = Heat)) +
+    geom_tile() +
+    scale_fill_gradient2(
+      low = "blue",
+      mid = "white",
+      high = "red",
+      midpoint = 0,
+      limits = c(-max(abs(heatmap_data$Heat), na.rm = TRUE), max(abs(heatmap_data$Heat), na.rm = TRUE)),
+      na.value = "grey50",
+      name = "Heat\n(-log10(p-value))"
+    ) +
+    theme_minimal() +
+    theme(
+      axis.text.x = element_text(angle = 45, hjust = 1),
+      axis.title.x = element_blank(),
+      axis.title.y = element_blank(),
+      panel.grid.major = element_blank(),
+      panel.grid.minor = element_blank()
+    ) +
+    labs(title = "Significance Heatmap")
+
+  # Plot the heatmap
+  print(heatmap)
+
+  # Return the significance table
   return(significance_table)
 }
