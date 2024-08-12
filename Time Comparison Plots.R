@@ -29,11 +29,11 @@ file_mapping <- c(
   "ra nxn div 22 plate1 spontaneous(000)(000).csv" = "DIV 22 Minute 5",
   "ra nxn div 22 plate1spontaneaous 60min(000)(000).csv" = "DIV 22 Minute 60",
   "ra nxn plate1cspontaneous 5min(000)(000).csv" = "DIV 24 Minute 5",
-  "ra nxn plate1cspontaneous 30min(000)(000).csv" = "DIV 24 Minute 10",
-  "ra nxn plate1cspontaneous 30min(001)(000).csv" = "DIV 24 Minute 30",
+  "ra nxn plate1cspontaneous 30min(000)(000).csv" = "DIV 24 Minute 30",
+  "ra nxn plate1cspontaneous 30min(001)(000).csv" = "DIV 24 Minute 35",
   "ra nxn plate1cspontaneous 5min(000)(000).csv" = "DIV 25 Minute 5",
   "ra nxn plate1cspontaneous 30min(000)(000).csv" = "DIV 25 Minute 30",
-  "ra nxn plate1cspontaneous 30min(001)(000).csv" = "DIV 25 Minute 30"
+  "ra nxn plate1cspontaneous 30min(001)(000).csv" = "DIV 25 Minute 35"
 )
 
 file_mapping_plate3 <- c(
@@ -48,25 +48,25 @@ file_mapping_plate3 <- c(
   "ra nxn div 16 plate 3(000)(000).csv" = "DIV 16 Minute 5",
   "ra nxn div 16 plate 3(001)(000).csv" = "DIV 16 Minute 10",
   "ra nxn div 17 plate3 spontaneous 30min in(000)(000).csv" = "DIV 17 Minute 30",
-  "ra nxn div 17 plate3 spontaneous 30min in(001)(000).csv" = "DIV 17 Minute 60",
+  "ra nxn div 17 plate3 spontaneous 30min in(001)(000).csv" = "DIV 17 Minute 35",
   "ra nxn div 18 plate 3 spontaeous 3 30min(000)(000).csv" = "DIV 18 Minute 30",
-  "ra nxn div 18 plate 3 spontaeous 25 min(000)(000).csv" = "DIV 18 Minute 55",
-  "ra nxn div 18 plate 3 spontaneou 5 min(001)(000).csv" = "DIV 18 Minute 60",
+  "ra nxn div 18 plate 3 spontaeous 25 min(000)(000).csv" = "DIV 18 Minute 25",
+  "ra nxn div 18 plate 3 spontaneou 5 min(001)(000).csv" = "DIV 18 Minute 5",
   "ra nxn div 20 plate3 spontaneous 5min(000)(000).csv" = "DIV 20 Minute 5",
-  "ra nxn div 20 plate3 spontaneous 30min(000)(000).csv" = "DIV 20 Minute 35",
-  "ra nxn div 20 plate3 spontaneous 60min(000)(000).csv" = "DIV 20 Minute 95",
+  "ra nxn div 20 plate3 spontaneous 30min(000)(000).csv" = "DIV 20 Minute 30",
+  "ra nxn div 20 plate3 spontaneous 60min(000)(000).csv" = "DIV 20 Minute 60",
   "ra nxn div 21 plate 3 spontaneous 5min(000)(000).csv" = "DIV 21 Minute 5",
-  "ra nxn div 21 plate 3 spontaneous 30min(000)(000).csv" = "DIV 21 Minute 35",
-  "ra nxn div 21 plate 3 spontaneous 30min(001)(000).csv" = "DIV 21 Minute 65",
+  "ra nxn div 21 plate 3 spontaneous 30min(000)(000).csv" = "DIV 21 Minute 30",
+  "ra nxn div 21 plate 3 spontaneous 30min(001)(000).csv" = "DIV 21 Minute 35",
   "ra nxn div 22 plate3 spontaneaous 5min(000)(000).csv" = "DIV 22 Minute 5",
   "ra nxn div 22 plate3 spontaneaous 5min(001)(000).csv" = "DIV 22 Minute 10",
-  "ra nxn div 22 plate3 spontaneaous 30min(000)(000).csv" = "DIV 22 Minute 40",
+  "ra nxn div 22 plate3 spontaneaous 30min(000)(000).csv" = "DIV 22 Minute 30",
   "ra nxn plate3 spontaneous 5min(000)(000).csv" = "DIV 24 Minute 5",
-  "ra nxn plate3 spontaneous 30min(000)(000).csv" = "DIV 24 Minute 35",
-  "ra nxn plate3 spontaneous 35min(000)(000).csv" = "DIV 24 Minute 70",
+  "ra nxn plate3 spontaneous 30min(000)(000).csv" = "DIV 24 Minute 30",
+  "ra nxn plate3 spontaneous 35min(000)(000).csv" = "DIV 24 Minute 35",
   "ra nxn plate3 spontaneous 5min(000)(000).csv" = "DIV 25 Minute 5",
-  "ra nxn plate3 spontaneous 30min(000)(000).csv" = "DIV 25 Minute 35",
-  "ra nxn plate3 spontaneous 35min(000)(000).csv" = "DIV 25 Minute 70"
+  "ra nxn plate3 spontaneous 30min(000)(000).csv" = "DIV 25 Minute 30",
+  "ra nxn plate3 spontaneous 35min(000)(000).csv" = "DIV 25 Minute 35"
 )
 
 # Function to process a single file

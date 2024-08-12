@@ -103,7 +103,7 @@ ElectrodeBursts <- R6Class("ElectrodeBurst",
         )
     },
 
-    create_comparison_raster_plot = function(control, treatment) {
+    create_comparison_raster_plot = function(...) {
       if (!"Treatment" %in% self$assignments$Well) {
         stop("'Treatment' row not found in assignments data frame.")
       }
@@ -111,19 +111,11 @@ ElectrodeBursts <- R6Class("ElectrodeBurst",
       # Get the treatment row
       treatment_row <- self$assignments[self$assignments$Well == "Treatment", ]
 
-      # Find wells for control and treatment
-      control_wells <- names(treatment_row)[treatment_row == control]
-      treatment_wells <- names(treatment_row)[treatment_row == treatment]
-
-      if (length(control_wells) == 0) {
-        stop(paste("Control '", control, "' not found in assignments data."))
-      }
-      if (length(treatment_wells) == 0) {
-        stop(paste("Treatment '", treatment, "' not found in assignments data."))
-      }
+      # Get all treatments passed as arguments
+      treatments <- list(...)
 
       # Function to create a single raster plot
-      create_raster <- function(wells, title) {
+      create_raster <- function(wells, title, x_lim) {
         plot_data <- self$data %>%
           dplyr::mutate(
             Well = sub("_.*", "", Electrode),
@@ -133,9 +125,6 @@ ElectrodeBursts <- R6Class("ElectrodeBurst",
             `Duration (s)` = as.numeric(`Duration (s)`)
           ) %>%
           dplyr::filter(Well %in% wells)
-
-        # Print data types for debugging
-        print(sapply(plot_data, class))
 
         # Remove rows with NA or non-finite values
         plot_data <- plot_data %>%
@@ -147,9 +136,10 @@ ElectrodeBursts <- R6Class("ElectrodeBurst",
 
         ggplot2::ggplot(plot_data, ggplot2::aes(x = `Time (s)`, y = Electrode)) +
           ggplot2::geom_tile(ggplot2::aes(width = `Duration (s)`, height = 0.8, fill = `Size (spikes)`)) +
-          ggplot2::facet_grid(. ~ Well, scales = "free", space = "free") +
+          ggplot2::facet_grid(Well ~ ., scales = "free_y", space = "free_y") +
           ggplot2::scale_fill_gradient(low = "red", high = "black") +
           ggplot2::scale_y_discrete(limits = rev(unique(plot_data$Electrode))) +
+          ggplot2::scale_x_continuous(limits = x_lim) +  # Set consistent x-axis limits
           ggplot2::labs(x = NULL, y = "Electrode", fill = "Spike Size", title = title) +
           ggplot2::theme_minimal() +
           ggplot2::theme(
@@ -162,16 +152,37 @@ ElectrodeBursts <- R6Class("ElectrodeBurst",
           )
       }
 
-      # Create individual plots
-      control_plot <- create_raster(control_wells, "Control")
-      treatment_plot <- create_raster(treatment_wells, "Treatment")
+      # Prepare data for all treatments
+      all_data <- lapply(treatments, function(treatment) {
+        wells <- names(treatment_row)[treatment_row == treatment]
+        if (length(wells) == 0) {
+          stop(paste("Treatment '", treatment, "' not found in assignments data."))
+        }
+        self$data %>%
+          dplyr::mutate(
+            Well = sub("_.*", "", Electrode),
+            `Time (s)` = as.numeric(`Time (s)`)
+          ) %>%
+          dplyr::filter(Well %in% wells)
+      })
 
-      # Combine plots
+      # Calculate overall x-axis limits
+      x_min <- min(sapply(all_data, function(df) min(df$`Time (s)`, na.rm = TRUE)))
+      x_max <- max(sapply(all_data, function(df) max(df$`Time (s)`, na.rm = TRUE)))
+      x_lim <- c(x_min, x_max)
+
+      # Create individual plots for each treatment
+      plot_list <- mapply(function(treatment, data) {
+        wells <- names(treatment_row)[treatment_row == treatment]
+        create_raster(wells, treatment, x_lim)
+      }, treatments, all_data, SIMPLIFY = FALSE)
+
+      # Combine plots vertically
       combined_plot <- ggpubr::ggarrange(
-        control_plot, treatment_plot,
-        ncol = 1, nrow = 2,
+        plotlist = plot_list,
+        ncol = 1, nrow = length(treatments),
         common.legend = TRUE, legend = "right",
-        heights = c(1, 1)
+        heights = rep(1, length(treatments))
       )
 
       # Add overall x-axis label
