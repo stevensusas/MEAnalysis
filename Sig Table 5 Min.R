@@ -81,6 +81,7 @@ generate_significance_table <- function(file_list, control_group, groups_to_omit
   library(readr)
   library(ggplot2)
   library(scales)
+  library(forcats)
 
   # Function to process a single file
   process_file <- function(file) {
@@ -91,19 +92,14 @@ generate_significance_table <- function(file_list, control_group, groups_to_omit
       samples_to_analyze <- setdiff(samples, groups_to_omit)
       df_treatment_averages <- df_treatment_averages[, c(control_group, samples_to_analyze)]
       t_test_results <- perform_t_tests(df_treatment_averages, control_group)
-      required_cols <- c("Treatment", "Metric", "P.Value", "Control_Mean", "Treatment_Mean")
-      missing_cols <- setdiff(required_cols, names(t_test_results))
-      if (length(missing_cols) > 0) {
-        stop(paste("Missing required columns:", paste(missing_cols, collapse = ", ")))
-      }
-      file_name <- basename(file)  # Use basename to get just the filename
+
+      file_name <- basename(file)
       abbreviated_file_name <- filename_mapping[file_name]
       if (is.null(abbreviated_file_name)) {
         warning(paste("No mapping found for file:", file_name))
-        abbreviated_file_name <- file_name  # Use original filename if no mapping found
+        abbreviated_file_name <- file_name
       }
-      print(paste("File name:", file_name))
-      print(paste("Mapped to:", abbreviated_file_name))
+
       t_test_results$File <- abbreviated_file_name
       return(t_test_results)
     }, error = function(e) {
@@ -118,6 +114,10 @@ generate_significance_table <- function(file_list, control_group, groups_to_omit
     stop("No valid results were obtained from any of the input files.")
   }
 
+  # Filter out treatment groups with less than 3 characters, except for "U"
+  all_results <- all_results %>%
+    filter(nchar(Treatment) >= 3 | Treatment == "U")
+
   significance_table <- all_results %>%
     mutate(
       Significance = case_when(
@@ -131,7 +131,14 @@ generate_significance_table <- function(file_list, control_group, groups_to_omit
       ),
       Heat = -log10(P.Value) * sign(Treatment_Mean - Control_Mean)
     ) %>%
-    mutate(Mean_Difference = Treatment_Mean - Control_Mean) %>%
+    mutate(Mean_Difference = Treatment_Mean - Control_Mean)
+
+  # Apply metric filter if provided
+  if (!is.null(metric_to_filter)) {
+    significance_table <- significance_table %>% filter(Metric == metric_to_filter)
+  }
+
+  significance_table <- significance_table %>%
     select(File, Treatment, Metric, Significance, Heat, Control_Mean, Treatment_Mean, Mean_Difference) %>%
     pivot_wider(
       names_from = File,
@@ -139,13 +146,6 @@ generate_significance_table <- function(file_list, control_group, groups_to_omit
       names_glue = "{File}_{.value}"
     ) %>%
     arrange(Treatment, Metric)
-
-  if (!is.null(metric_to_filter)) {
-    significance_table <- significance_table %>%
-      filter(Metric == metric_to_filter)
-  } else {
-    message("No specific metric provided. Returning results for all metrics.")
-  }
 
   # Prepare data for heatmap
   heatmap_data <- significance_table %>%
@@ -159,8 +159,14 @@ generate_significance_table <- function(file_list, control_group, groups_to_omit
       Heat = map_dbl(Heat, ~ ifelse(is.list(.x), unlist(.x)[1], as.numeric(.x)))
     )
 
+  # Reorder the Treatment levels to put control group on top
+  heatmap_data <- heatmap_data %>%
+    mutate(Treatment = factor(Treatment,
+                              levels = c(control_group,
+                                         setdiff(unique(Treatment), control_group))))
+
   # Create heatmap
-  heatmap <- ggplot(heatmap_data, aes(x = File, y = paste(Treatment, Metric), fill = Heat)) +
+  heatmap <- ggplot(heatmap_data, aes(x = File, y = fct_rev(interaction(Treatment, Metric)), fill = Heat)) +
     geom_tile() +
     scale_fill_gradient2(
       low = "blue",
@@ -186,78 +192,34 @@ generate_significance_table <- function(file_list, control_group, groups_to_omit
   return(significance_table)
 }
 
-
-plate1 <-c('/Users/stevensu/Desktop/Korb Lab/MEA Analysis/Steven_MEA/ra nxn and Sean 6-4-24/Plate 1/6-04-24 nxn DIV 11 PLATE 1(002)(001).csv',
-         '/Users/stevensu/Desktop/Korb Lab/MEA Analysis/Steven_MEA/ra nxn and Sean 6-5-24/Plate 1/6-05-24 nxn DIV 12 PLATE 1(001)(001).csv',
-         '/Users/stevensu/Desktop/Korb Lab/MEA Analysis/Steven_MEA/ra nxn and Sean 6-6-24/Plate 1/6-06-24 nxn DIV 13 PLATE 1(000)(001).csv',
-         '/Users/stevensu/Desktop/Korb Lab/MEA Analysis/Steven_MEA/ra nxn and Sean 6-7-24/Plate 1/div 14 nxn 6-7-24 plate 1(000)(000).csv',
-
-         '/Users/stevensu/Desktop/Korb Lab/MEA Analysis/Steven_MEA/ra nxn and Sean 6-8-24/Plate 1/ra nxn div 15 plate 1(000)(000).csv',
-
-         '/Users/stevensu/Desktop/Korb Lab/MEA Analysis/Steven_MEA/ra nxn and Sean 6-9-24/Plate 1/ra nxn div 16 plate 1(003)(000).csv',
-
-         '/Users/stevensu/Desktop/Korb Lab/MEA Analysis/Steven_MEA/ra nxn and Sean 6-10-24/Plate 1/ra nxn div 17 plate1 spontaneous(001)(000).csv',
-
-         '/Users/stevensu/Desktop/Korb Lab/MEA Analysis/Steven_MEA/ra nxn and Sean 6-11-24/Plate 1/ra nxn div 18 plate 1 spontaneous 20min(000)(000).csv',
-         '/Users/stevensu/Desktop/Korb Lab/MEA Analysis/Steven_MEA/ra nxn and Sean 6-11-24/Plate 1/ra nxn div 18 plate 1 spontaneous 30min(000)(000).csv',
-
-         '/Users/stevensu/Desktop/Korb Lab/MEA Analysis/Steven_MEA/ra nxn and Sean 6-13-24 DIV 20/Plate 1/ra nxn div 20 plate1 spontaneous 5min(000)(000).csv',
-         '/Users/stevensu/Desktop/Korb Lab/MEA Analysis/Steven_MEA/ra nxn and Sean 6-13-24 DIV 20/Plate 1/ra nxn div 20 plate1 spontaneous 30min(000)(000).csv',
-         '/Users/stevensu/Desktop/Korb Lab/MEA Analysis/Steven_MEA/ra nxn and Sean 6-13-24 DIV 20/Plate 1/ra nxn div 20 plate1 spontaneous 60min(000)(000).csv',
-
-         '/Users/stevensu/Desktop/Korb Lab/MEA Analysis/Steven_MEA/ra nxn and Sean 6-14-24 DIV 21/Plate 1/ra nxn div 21 spontaneous 5min(000)(000).csv',
-         '/Users/stevensu/Desktop/Korb Lab/MEA Analysis/Steven_MEA/ra nxn and Sean 6-14-24 DIV 21/Plate 1/ra nxn div 21 spontaneous 30min(000)(000).csv',
-         '/Users/stevensu/Desktop/Korb Lab/MEA Analysis/Steven_MEA/ra nxn and Sean 6-14-24 DIV 21/Plate 1/ra nxn div 21 spontaneous 50min(000)(000).csv',
-         '/Users/stevensu/Desktop/Korb Lab/MEA Analysis/Steven_MEA/ra nxn and Sean 6-15-24 DIV 22/Plate 1/ra nxn div 22 plate1 spontaneous 30min(000)(000).csv',
-         '/Users/stevensu/Desktop/Korb Lab/MEA Analysis/Steven_MEA/ra nxn and Sean 6-15-24 DIV 22/Plate 1/ra nxn div 22 plate1 spontaneous(000)(000).csv',
-         '/Users/stevensu/Desktop/Korb Lab/MEA Analysis/Steven_MEA/ra nxn and Sean 6-15-24 DIV 22/Plate 1/ra nxn div 22 plate1spontaneaous 60min(000)(000).csv',
-         '/Users/stevensu/Desktop/Korb Lab/MEA Analysis/Steven_MEA/ra nxn and Sean 6-17-24/Plate 1/ra nxn plate1cspontaneous 5min(000)(000).csv',
-         '/Users/stevensu/Desktop/Korb Lab/MEA Analysis/Steven_MEA/ra nxn and Sean 6-17-24/Plate 1/ra nxn plate1cspontaneous 30min(000)(000).csv',
-         '/Users/stevensu/Desktop/Korb Lab/MEA Analysis/Steven_MEA/ra nxn and Sean 6-17-24/Plate 1/ra nxn plate1cspontaneous 30min(001)(000).csv',
-         '/Users/stevensu/Desktop/Korb Lab/MEA Analysis/Steven_MEA/ra nxn and Sean 6-18-24 div 25/Plate 1/ra nxn plate1cspontaneous 5min(000)(000).csv',
-         '/Users/stevensu/Desktop/Korb Lab/MEA Analysis/Steven_MEA/ra nxn and Sean 6-18-24 div 25/Plate 1/ra nxn plate1cspontaneous 30min(000)(000).csv',
-         '/Users/stevensu/Desktop/Korb Lab/MEA Analysis/Steven_MEA/ra nxn and Sean 6-18-24 div 25/Plate 1/ra nxn plate1cspontaneous 30min(001)(000).csv'
+plate1 <- c(
+  '/Users/stevensu/Desktop/Korb Lab/MEA Analysis/Steven_MEA/ra nxn and Sean 6-4-24/Plate 1/6-04-24 nxn DIV 11 PLATE 1(002)(001).csv',
+  '/Users/stevensu/Desktop/Korb Lab/MEA Analysis/Steven_MEA/ra nxn and Sean 6-5-24/Plate 1/6-05-24 nxn DIV 12 PLATE 1(001)(001).csv',
+  '/Users/stevensu/Desktop/Korb Lab/MEA Analysis/Steven_MEA/ra nxn and Sean 6-6-24/Plate 1/6-06-24 nxn DIV 13 PLATE 1(000)(001).csv',
+  '/Users/stevensu/Desktop/Korb Lab/MEA Analysis/Steven_MEA/ra nxn and Sean 6-7-24/Plate 1/div 14 nxn 6-7-24 plate 1(000)(000).csv',
+  '/Users/stevensu/Desktop/Korb Lab/MEA Analysis/Steven_MEA/ra nxn and Sean 6-8-24/Plate 1/ra nxn div 15 plate 1(000)(000).csv',
+  '/Users/stevensu/Desktop/Korb Lab/MEA Analysis/Steven_MEA/ra nxn and Sean 6-9-24/Plate 1/ra nxn div 16 plate 1(003)(000).csv',
+  '/Users/stevensu/Desktop/Korb Lab/MEA Analysis/Steven_MEA/ra nxn and Sean 6-10-24/Plate 1/ra nxn div 17 plate1 spontaneous(001)(000).csv',
+  '/Users/stevensu/Desktop/Korb Lab/MEA Analysis/Steven_MEA/ra nxn and Sean 6-13-24 DIV 20/Plate 1/ra nxn div 20 plate1 spontaneous 5min(000)(000).csv',
+  '/Users/stevensu/Desktop/Korb Lab/MEA Analysis/Steven_MEA/ra nxn and Sean 6-14-24 DIV 21/Plate 1/ra nxn div 21 spontaneous 5min(000)(000).csv',
+  '/Users/stevensu/Desktop/Korb Lab/MEA Analysis/Steven_MEA/ra nxn and Sean 6-15-24 DIV 22/Plate 1/ra nxn div 22 plate1 spontaneous(000)(000).csv',
+  '/Users/stevensu/Desktop/Korb Lab/MEA Analysis/Steven_MEA/ra nxn and Sean 6-17-24/Plate 1/ra nxn plate1cspontaneous 5min(000)(000).csv',
+  '/Users/stevensu/Desktop/Korb Lab/MEA Analysis/Steven_MEA/ra nxn and Sean 6-18-24 div 25/Plate 1/ra nxn plate1cspontaneous 5min(000)(000).csv'
 )
 
 plate3 <- c(
-
   "/Users/stevensu/Desktop/Korb Lab/MEA Analysis/Steven_MEA/ra nxn and Sean 6-4-24/Plate 3/6-04-24 nxn DIV 11 PLATE 3(001)(000).csv",
-  "/Users/stevensu/Desktop/Korb Lab/MEA Analysis/Steven_MEA/ra nxn and Sean 6-4-24/Plate 3/6-04-24 nxn DIV 11 PLATE 3(001)(001).csv",
-
   "/Users/stevensu/Desktop/Korb Lab/MEA Analysis/Steven_MEA/ra nxn and Sean 6-5-24/Plate 3/6-05-24 nxn DIV 12 PLATE 3(000)(000).csv",
-  "/Users/stevensu/Desktop/Korb Lab/MEA Analysis/Steven_MEA/ra nxn and Sean 6-5-24/Plate 3/6-05-24 nxn DIV 12 PLATE 3(000)(001).csv",
-
   "/Users/stevensu/Desktop/Korb Lab/MEA Analysis/Steven_MEA/ra nxn and Sean 6-6-24/Plate 3/6-06-24 nxn DIV 13 PLATE 3(000)(000).csv",
-  "/Users/stevensu/Desktop/Korb Lab/MEA Analysis/Steven_MEA/ra nxn and Sean 6-6-24/Plate 3/6-06-24 nxn DIV 13 PLATE 3(000)(001).csv",
-
   "/Users/stevensu/Desktop/Korb Lab/MEA Analysis/Steven_MEA/ra nxn and Sean 6-7-24/Plate 3/div 14 nxn 6-7-24 plate 3(000)(000).csv",
-
   "/Users/stevensu/Desktop/Korb Lab/MEA Analysis/Steven_MEA/ra nxn and Sean 6-8-24/Plate 3/ra nxn div 15 plate 3(002)(000).csv",
-
   "/Users/stevensu/Desktop/Korb Lab/MEA Analysis/Steven_MEA/ra nxn and Sean 6-9-24/Plate 3/ra nxn div 16 plate 3(000)(000).csv",
-  "/Users/stevensu/Desktop/Korb Lab/MEA Analysis/Steven_MEA/ra nxn and Sean 6-9-24/Plate 3/ra nxn div 16 plate 3(001)(000).csv",
-
-  "/Users/stevensu/Desktop/Korb Lab/MEA Analysis/Steven_MEA/ra nxn and Sean 6-10-24/Plate 3/ra nxn div 17 plate3 spontaneous 30min in(000)(000).csv",
-  "/Users/stevensu/Desktop/Korb Lab/MEA Analysis/Steven_MEA/ra nxn and Sean 6-10-24/Plate 3/ra nxn div 17 plate3 spontaneous 30min in(001)(000).csv",
-  "/Users/stevensu/Desktop/Korb Lab/MEA Analysis/Steven_MEA/ra nxn and Sean 6-11-24/Plate 3/ra nxn div 18 plate 3 spontaeous 3 30min(000)(000).csv",
-  "/Users/stevensu/Desktop/Korb Lab/MEA Analysis/Steven_MEA/ra nxn and Sean 6-11-24/Plate 3/ra nxn div 18 plate 3 spontaeous 25 min(000)(000).csv",
   "/Users/stevensu/Desktop/Korb Lab/MEA Analysis/Steven_MEA/ra nxn and Sean 6-11-24/Plate 3/ra nxn div 18 plate 3 spontaneou 5 min(001)(000).csv",
   "/Users/stevensu/Desktop/Korb Lab/MEA Analysis/Steven_MEA/ra nxn and Sean 6-13-24 DIV 20/Plate 3/ra nxn div 20 plate3 spontaneous 5min(000)(000).csv",
-  "/Users/stevensu/Desktop/Korb Lab/MEA Analysis/Steven_MEA/ra nxn and Sean 6-13-24 DIV 20/Plate 3/ra nxn div 20 plate3 spontaneous 30min(000)(000).csv",
-  "/Users/stevensu/Desktop/Korb Lab/MEA Analysis/Steven_MEA/ra nxn and Sean 6-13-24 DIV 20/Plate 3/ra nxn div 20 plate3 spontaneous 60min(000)(000).csv",
   "/Users/stevensu/Desktop/Korb Lab/MEA Analysis/Steven_MEA/ra nxn and Sean 6-14-24 DIV 21/Plate 3/ra nxn div 21 plate 3 spontaneous 5min(000)(000).csv",
-  "/Users/stevensu/Desktop/Korb Lab/MEA Analysis/Steven_MEA/ra nxn and Sean 6-14-24 DIV 21/Plate 3/ra nxn div 21 plate 3 spontaneous 30min(000)(000).csv",
-  "/Users/stevensu/Desktop/Korb Lab/MEA Analysis/Steven_MEA/ra nxn and Sean 6-14-24 DIV 21/Plate 3/ra nxn div 21 plate 3 spontaneous 30min(001)(000).csv",
   "/Users/stevensu/Desktop/Korb Lab/MEA Analysis/Steven_MEA/ra nxn and Sean 6-15-24 DIV 22/Plate 3/ra nxn div 22 plate3 spontaneaous 5min(000)(000).csv",
-  "/Users/stevensu/Desktop/Korb Lab/MEA Analysis/Steven_MEA/ra nxn and Sean 6-15-24 DIV 22/Plate 3/ra nxn div 22 plate3 spontaneaous 5min(001)(000).csv",
-  "/Users/stevensu/Desktop/Korb Lab/MEA Analysis/Steven_MEA/ra nxn and Sean 6-15-24 DIV 22/Plate 3/ra nxn div 22 plate3 spontaneaous 30min(000)(000).csv",
   "/Users/stevensu/Desktop/Korb Lab/MEA Analysis/Steven_MEA/ra nxn and Sean 6-17-24/Plate 3/ra nxn plate3 spontaneous 5min(000)(000).csv",
-  "/Users/stevensu/Desktop/Korb Lab/MEA Analysis/Steven_MEA/ra nxn and Sean 6-17-24/Plate 3/ra nxn plate3 spontaneous 30min(000)(000).csv",
-  "/Users/stevensu/Desktop/Korb Lab/MEA Analysis/Steven_MEA/ra nxn and Sean 6-17-24/Plate 3/ra nxn plate3 spontaneous 35min(000)(000).csv",
-  "/Users/stevensu/Desktop/Korb Lab/MEA Analysis/Steven_MEA/ra nxn and Sean 6-18-24 div 25/Plate 3/ra nxn plate3 spontaneous 5min(000)(000).csv",
-  "/Users/stevensu/Desktop/Korb Lab/MEA Analysis/Steven_MEA/ra nxn and Sean 6-18-24 div 25/Plate 3/ra nxn plate3 spontaneous 30min(000)(000).csv",
-  "/Users/stevensu/Desktop/Korb Lab/MEA Analysis/Steven_MEA/ra nxn and Sean 6-18-24 div 25/Plate 3/ra nxn plate3 spontaneous 35min(000)(000).csv"
-
+  "/Users/stevensu/Desktop/Korb Lab/MEA Analysis/Steven_MEA/ra nxn and Sean 6-18-24 div 25/Plate 3/ra nxn plate3 spontaneous 5min(000)(000).csv"
 )
 
 
@@ -316,7 +278,7 @@ groups_to_omit <- get_strings_ending_with_HET_and_NEG_WT_and_short(get_treatment
 specific_metric <- "Mean Firing Rate (Hz)"
 
 # Example usage with plate3
-significance_table <- generate_significance_table(plate1, control_group, groups_to_omit, specific_metric, plate1_mapping)
+significance_table <- generate_significance_table(plate1, control_group, groups_to_omit, NULL, plate1_mapping)
 print(significance_table)
 
 #setwd('/Users/stevensu/Desktop/Korb Lab/MEA Analysis/Steven_MEA/Results')
