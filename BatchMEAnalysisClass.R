@@ -138,6 +138,7 @@ BatchMEAnalysis <- R6Class(
 
     generate_significance_overview = function(control_group, groups_to_include = NULL, metrics_to_visualize = NULL, title) {
       file_list = self$file_paths
+
       # Function to process a single file
       process_file <- function(file) {
         tryCatch({
@@ -151,10 +152,10 @@ BatchMEAnalysis <- R6Class(
             samples_to_analyze <- intersect(samples, groups_to_include)
           }
 
-
           # Filter the treatment averages by the samples to analyze
           df_treatment_averages <- df_treatment_averages[, c(samples_to_analyze)]
           print(df_treatment_averages)
+
           # Filter metrics if specified
           if (!is.null(metrics_to_visualize)) {
             metric_lookup <- setNames(
@@ -166,7 +167,6 @@ BatchMEAnalysis <- R6Class(
             rows_to_keep <- names(metric_lookup)[metric_lookup %in% metrics_to_visualize]
             rows_to_keep <- c(rows_to_keep, 'Total Wells')
             df_treatment_averages <- df_treatment_averages[rows_to_keep, ]
-
           }
 
           t_test_results <- self$perform_t_tests(df_treatment_averages, control_group)
@@ -218,6 +218,7 @@ BatchMEAnalysis <- R6Class(
         ) %>%
         mutate(
           File = sub("_Heat$", "", File),
+          File = sub("\\.csv$", "", File),  # Remove the .csv suffix
           Heat = map_dbl(Heat, ~ ifelse(is.list(.x), unlist(.x)[1], as.numeric(.x)))
         )
 
@@ -226,6 +227,7 @@ BatchMEAnalysis <- R6Class(
         filter(Treatment != control_group) %>%
         mutate(Treatment = factor(Treatment,
                                   levels = setdiff(unique(Treatment), control_group)))
+
       # Create heatmap
       heatmap <- ggplot(heatmap_data, aes(x = File, y = fct_rev(interaction(Treatment, Metric)), fill = Heat)) +
         geom_tile() +
@@ -259,5 +261,6 @@ BatchMEAnalysis <- R6Class(
 
       return(significance_table)
     }
+
   )
 )
