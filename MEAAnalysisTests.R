@@ -94,7 +94,7 @@ print(treatment_averages)
 control_group <- "Luciferase-HET"
 groups_to_plot <- c("KMT2C-HET", "NSD1-HET", "ASH1L-HET", "MED13L-HET", "CHD8-HET", "TBR1-HET", "DNMT3A-HET", "KDM6B-HET", "MBD5-HET", "SETD5-HET", "Luciferase-HET")
 
-t_test_plot <- analysis$treatment_averages_t_test_plot(control_group, groups_to_plot)
+t_test_plot <- analysis$treatment_averages_t_test_plot(control_group, groups_to_plot, 'Hello')
 
 print(t_test_plot)
 
