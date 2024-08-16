@@ -58,7 +58,7 @@ for (metric in metrics) {
   obj = BatchMEAnalysis$new(plate1_5min)
   obj$run_mea_analysis(conditions, metric, control, "Plate 1 Min 5")
   setwd('/Users/stevensu/Desktop/Korb Lab/MEA Analysis/Rili Dataset Final Results/Plate 1 Time Course 5 Min/NEG v HET')
-  ggsave(paste(metric, '.png', sep = ""), width = 15, height = 15, dpi = 300)
+  ggsave(paste(metric, '.pdf', sep = ""), width = 15, height = 15, dpi = 300)
 
 }
 
@@ -68,7 +68,7 @@ for (metric in metrics) {
   obj = BatchMEAnalysis$new(plate1_5min)
   obj$run_mea_analysis(conditions, metric, control, "Plate 1 Min 5")
   setwd('/Users/stevensu/Desktop/Korb Lab/MEA Analysis/Rili Dataset Final Results/Plate 1 Time Course 5 Min/LUC WT v DEP WT')
-  ggsave(paste(metric, '.png', sep = ""), width = 15, height = 20, dpi = 300)
+  ggsave(paste(metric, '.pdf', sep = ""), width = 15, height = 20, dpi = 300)
 }
 
 for (metric in metrics) {
@@ -77,7 +77,7 @@ for (metric in metrics) {
  obj = BatchMEAnalysis$new(plate1_5min)
  obj$run_mea_analysis(conditions, metric, control, "Plate 1 Min 5")
  setwd('/Users/stevensu/Desktop/Korb Lab/MEA Analysis/Rili Dataset Final Results/Plate 1 Time Course 5 Min/LUC HET v DEP HET')
- ggsave(paste(metric, '.png', sep = ""), width = 15, height = 20, dpi = 300)
+ ggsave(paste(metric, '.pdf', sep = ""), width = 15, height = 20, dpi = 300)
 }
 
 
@@ -87,7 +87,7 @@ for (metric in metrics) {
   obj = BatchMEAnalysis$new(plate1_30min)
   obj$run_mea_analysis(conditions, metric, control, "Plate 1 Min 30")
   setwd('/Users/stevensu/Desktop/Korb Lab/MEA Analysis/Rili Dataset Final Results/Plate 1 Time Course 30 Min/NEG v HET')
-  ggsave(paste(metric, '.png', sep = ""), width = 15, height = 15, dpi = 300)
+  ggsave(paste(metric, '.pdf', sep = ""), width = 15, height = 15, dpi = 300)
 }
 
 for (metric in metrics) {
@@ -96,7 +96,7 @@ for (metric in metrics) {
   obj = BatchMEAnalysis$new(plate1_30min)
   obj$run_mea_analysis(conditions, metric, control, "Plate 1 Min 30")
   setwd('/Users/stevensu/Desktop/Korb Lab/MEA Analysis/Rili Dataset Final Results/Plate 1 Time Course 30 Min/LUC WT v DEP WT')
-  ggsave(paste(metric, '.png', sep = ""), width = 15, height = 20, dpi = 300)
+  ggsave(paste(metric, '.pdf', sep = ""), width = 15, height = 20, dpi = 300)
 }
 
 for (metric in metrics) {
@@ -105,7 +105,7 @@ for (metric in metrics) {
   obj = BatchMEAnalysis$new(plate1_30min)
   obj$run_mea_analysis(conditions, metric, control, "Plate 1 Min 30")
   setwd('/Users/stevensu/Desktop/Korb Lab/MEA Analysis/Rili Dataset Final Results/Plate 1 Time Course 30 Min/LUC HET v DEP HET')
-  ggsave(paste(metric, '.png', sep = ""), width = 15, height = 20, dpi = 300)
+  ggsave(paste(metric, '.pdf', sep = ""), width = 15, height = 20, dpi = 300)
 }
 
 
@@ -115,7 +115,7 @@ for (metric in metrics) {
   obj = BatchMEAnalysis$new(plate3_5min)
   obj$run_mea_analysis(conditions, metric, control, "Plate 3 Min 5")
   setwd('/Users/stevensu/Desktop/Korb Lab/MEA Analysis/Rili Dataset Final Results/Plate 3 Time Course 5 Min/NEG v HET')
-  ggsave(paste(metric, '.png', sep = ""), width = 15, height = 15, dpi = 300)
+  ggsave(paste(metric, '.pdf', sep = ""), width = 15, height = 15, dpi = 300)
 
 }
   for (metric in metrics) {
@@ -124,7 +124,7 @@ for (metric in metrics) {
     obj = BatchMEAnalysis$new(plate3_5min)
     obj$run_mea_analysis(conditions, metric, control, "Plate 3 Min 5")
     setwd('/Users/stevensu/Desktop/Korb Lab/MEA Analysis/Rili Dataset Final Results/Plate 3 Time Course 5 Min/LUC HET v DEP HET')
-    ggsave(paste(metric, '.png', sep = ""), width = 15, height = 20, dpi = 300)
+    ggsave(paste(metric, '.pdf', sep = ""), width = 15, height = 20, dpi = 300)
   }
 
 for (metric in metrics) {
@@ -133,7 +133,7 @@ for (metric in metrics) {
   obj = BatchMEAnalysis$new(plate3_30min)
   obj$run_mea_analysis(conditions, metric, control, "Plate 3 Min 30")
   setwd('/Users/stevensu/Desktop/Korb Lab/MEA Analysis/Rili Dataset Final Results/Plate 3 Time Course 30 Min/NEG v HET')
-  ggsave(paste(metric, '.png', sep = ""), width = 15, height = 15, dpi = 300)
+  ggsave(paste(metric, '.pdf', sep = ""), width = 15, height = 15, dpi = 300)
 }
 
   for (metric in metrics) {
@@ -142,5 +142,5 @@ for (metric in metrics) {
     obj = BatchMEAnalysis$new(plate3_30min)
     obj$run_mea_analysis(conditions, metric, control, "Plate 3 Min 30")
     setwd('/Users/stevensu/Desktop/Korb Lab/MEA Analysis/Rili Dataset Final Results/Plate 3 Time Course 30 Min/LUC HET v DEP HET')
-    ggsave(paste(metric, '.png', sep = ""), width = 15, height = 20, dpi = 300)
+    ggsave(paste(metric, '.pdf', sep = ""), width = 15, height = 20, dpi = 300)
   }

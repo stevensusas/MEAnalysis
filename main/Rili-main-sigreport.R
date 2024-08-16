@@ -58,7 +58,7 @@ control = "NEG Control-WT"
 conditions = c("NEG Control-WT", 'NEG Control-HET')
 table = p1min5$generate_significance_overview(control, conditions, metrics, 'Plate 1 Min 5')
 setwd('/Users/stevensu/Desktop/Korb Lab/MEA Analysis/Rili Dataset Final Results/Sigs/Plate 1 5 Min NEG v HET Sig')
-ggsave(paste('Plate 1 Min 5', '.png', sep = ""), width = 10, height = 10, dpi = 300)
+ggsave(paste('Plate 1 Min 5', '.pdf', sep = ""), width = 10, height = 10, dpi = 300)
 write.csv(table, paste('Plate 1 Min 5', '_sig_table.csv', sep = ""), row.names = TRUE)
 
 
@@ -67,7 +67,7 @@ control = "Luciferase-WT"
 conditions = c("ASH1L-WT", "CHD8-WT", "DNMT3A-WT", "KDM6B-WT", "KMT2C-WT", "Luciferase-WT", "MBD5-WT", "MED13L-WT", "NSD1-WT", "SETD5-WT", "TBR1-WT")
 table = p1min5$generate_significance_overview(control, conditions, metrics, 'Plate 1 Min 5')
 setwd('/Users/stevensu/Desktop/Korb Lab/MEA Analysis/Rili Dataset Final Results/Sigs/Plate 1 5 Min LUC WT v DEP WT Sig')
-ggsave(paste('Plate 1 Min 5', '.png', sep = ""), width = 10, height = 10, dpi = 300)
+ggsave(paste('Plate 1 Min 5', '.pdf', sep = ""), width = 10, height = 10, dpi = 300)
 write.csv(table, paste('Plate 1 Min 5', '_sig_table.csv', sep = ""), row.names = TRUE)
 
 p1min5 = BatchMEAnalysis$new(plate1_5min)
@@ -75,7 +75,7 @@ control = "Luciferase-HET"
 conditions = c("ASH1L-HET", "CHD8-HET", "DNMT3A-HET", "KDM6B-HET", "KMT2C-HET", "Luciferase-HET", "MBD5-HET", "MED13L-HET", "NSD1-HET", "SETD5-HET", "TBR1-HET")
 table = p1min5$generate_significance_overview(control, conditions, metrics, 'Plate 1 Min 5')
 setwd('/Users/stevensu/Desktop/Korb Lab/MEA Analysis/Rili Dataset Final Results/Sigs/Plate 1 5 Min LUC HET v DEP HET Sig')
-ggsave(paste('Plate 1 Min 5', '.png', sep = ""), width = 10, height = 10, dpi = 300)
+ggsave(paste('Plate 1 Min 5', '.pdf', sep = ""), width = 10, height = 10, dpi = 300)
 write.csv(table, paste('Plate 1 Min 5', '_sig_table.csv', sep = ""), row.names = TRUE)
 
 
@@ -84,7 +84,7 @@ control = "NEG Control-WT"
 conditions = c("NEG Control-WT", 'NEG Control-HET')
 table = p1min30$generate_significance_overview(control, conditions, metrics, 'Plate 1 Min 30')
 setwd('/Users/stevensu/Desktop/Korb Lab/MEA Analysis/Rili Dataset Final Results/Sigs/Plate 1 30 Min NEG v HET Sig')
-ggsave(paste('Plate 1 Min 30', '.png', sep = ""), width = 10, height = 10, dpi = 300)
+ggsave(paste('Plate 1 Min 30', '.pdf', sep = ""), width = 10, height = 10, dpi = 300)
 write.csv(table, paste('Plate 1 Min 30', '_sig_table.csv', sep = ""), row.names = TRUE)
 
 
@@ -93,7 +93,7 @@ control = "Luciferase-WT"
 conditions = c("ASH1L-WT", "CHD8-WT", "DNMT3A-WT", "KDM6B-WT", "KMT2C-WT", "Luciferase-WT", "MBD5-WT", "MED13L-WT", "NSD1-WT", "SETD5-WT", "TBR1-WT")
 table = p1min30$generate_significance_overview(control, conditions, metrics, 'Plate 1 Min 30')
 setwd('/Users/stevensu/Desktop/Korb Lab/MEA Analysis/Rili Dataset Final Results/Sigs/Plate 1 30 Min LUC WT v DEP WT Sig')
-ggsave(paste('Plate 1 Min 30', '.png', sep = ""), width = 10, height = 10, dpi = 300)
+ggsave(paste('Plate 1 Min 30', '.pdf', sep = ""), width = 10, height = 10, dpi = 300)
 write.csv(table, paste('Plate 1 Min 30', '_sig_table.csv', sep = ""), row.names = TRUE)
 
 
@@ -102,7 +102,7 @@ control = "Luciferase-HET"
 conditions = c("ASH1L-HET", "CHD8-HET", "DNMT3A-HET", "KDM6B-HET", "KMT2C-HET", "Luciferase-HET", "MBD5-HET", "MED13L-HET", "NSD1-HET", "SETD5-HET", "TBR1-HET")
 table = p1min30$generate_significance_overview(control, conditions, metrics, 'Plate 1 Min 30')
 setwd('/Users/stevensu/Desktop/Korb Lab/MEA Analysis/Rili Dataset Final Results/Sigs/Plate 1 30 Min LUC HET v DEP HET Sig')
-ggsave(paste('Plate 1 Min 30', '.png', sep = ""), width = 10, height = 10, dpi = 300)
+ggsave(paste('Plate 1 Min 30', '.pdf', sep = ""), width = 10, height = 10, dpi = 300)
 write.csv(table, paste('Plate 1 Min 30', '_sig_table.csv', sep = ""), row.names = TRUE)
 
 
@@ -111,7 +111,7 @@ control = "U"
 conditions = c("U", 'NEG Control-HET')
 table = p3min5$generate_significance_overview(control, conditions, metrics, 'Plate 3 Min 5')
 setwd('/Users/stevensu/Desktop/Korb Lab/MEA Analysis/Rili Dataset Final Results/Sigs/Plate 3 5 Min NEG v HET Sig')
-ggsave(paste('Plate 3 Min 5', '.png', sep = ""), width = 10, height = 10, dpi = 300)
+ggsave(paste('Plate 3 Min 5', '.pdf', sep = ""), width = 10, height = 10, dpi = 300)
 write.csv(table, paste('Plate 3 Min 5', '_sig_table.csv', sep = ""), row.names = TRUE)
 
 p3min5 = BatchMEAnalysis$new(plate3_5min)
@@ -119,7 +119,7 @@ control = "Luciferase-HET"
 conditions = c("ASH1L-HET", "CHD8-HET", "DNMT3A-HET", "KDM6B-HET", "KMT2C-HET", "Luciferase-HET", "MBD5-HET", "MED13L-HET", "NSD1-HET", "SETD5-HET", "TBR1-HET")
 table = p3min5$generate_significance_overview(control, conditions, metrics, 'Plate 3 Min 5')
 setwd('/Users/stevensu/Desktop/Korb Lab/MEA Analysis/Rili Dataset Final Results/Sigs/Plate 3 5 Min LUC HET v DEP HET Sig')
-ggsave(paste('Plate 3 Min 5', '.png', sep = ""), width = 10, height = 10, dpi = 300)
+ggsave(paste('Plate 3 Min 5', '.pdf', sep = ""), width = 10, height = 10, dpi = 300)
 write.csv(table, paste('Plate 3 Min 5', '_sig_table.csv', sep = ""), row.names = TRUE)
 
 p3min30 = BatchMEAnalysis$new(plate3_30min)
@@ -127,7 +127,7 @@ control = "U"
 conditions = c("U", 'NEG Control-HET')
 table = p3min30$generate_significance_overview(control, conditions, metrics, 'Plate 3 Min 30')
 setwd('/Users/stevensu/Desktop/Korb Lab/MEA Analysis/Rili Dataset Final Results/Sigs/Plate 3 30 Min NEG v HET Sig')
-ggsave(paste('Plate 3 Min 30', '.png', sep = ""), width = 10, height = 10, dpi = 300)
+ggsave(paste('Plate 3 Min 30', '.pdf', sep = ""), width = 10, height = 10, dpi = 300)
 write.csv(table, paste('Plate 3 Min 30', '_sig_table.csv', sep = ""), row.names = TRUE)
 
 p3min30 = BatchMEAnalysis$new(plate3_30min)
@@ -135,7 +135,7 @@ control = "Luciferase-HET"
 conditions = c("ASH1L-HET", "CHD8-HET", "DNMT3A-HET", "KDM6B-HET", "KMT2C-HET", "Luciferase-HET", "MBD5-HET", "MED13L-HET", "NSD1-HET", "SETD5-HET", "TBR1-HET")
 table = p3min30$generate_significance_overview(control, conditions, metrics, 'Plate 3 Min 30')
 setwd('/Users/stevensu/Desktop/Korb Lab/MEA Analysis/Rili Dataset Final Results/Sigs/Plate 3 30 Min LUC HET v DEP HET Sig')
-ggsave(paste('Plate 3 Min 30', '.png', sep = ""), width = 10, height = 10, dpi = 300)
+ggsave(paste('Plate 3 Min 30', '.pdf', sep = ""), width = 10, height = 10, dpi = 300)
 write.csv(table, paste('Plate 3 Min 30', '_sig_table.csv', sep = ""), row.names = TRUE)
 
 

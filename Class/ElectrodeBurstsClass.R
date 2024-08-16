@@ -1,10 +1,10 @@
 library(R6)
-source("/Users/stevensu/Desktop/Korb Lab/MEA Analysis/Korb-MEA/MEA Analysis.R")
 
 ElectrodeBursts <- R6Class("ElectrodeBurst",
   public = list(
     data = NULL,
     assignments = NULL,
+    inherit = MEAnalysis,  # Inherit from MEAnalysis
 
     # The initialize method is called when a new object is created
     initialize = function(filepath) {
@@ -103,7 +103,7 @@ ElectrodeBursts <- R6Class("ElectrodeBurst",
         )
     },
 
-    create_comparison_raster_plot = function(...) {
+    create_comparison_raster_plot = function(control_group, treatments_array , plot_title) {
       if (!"Treatment" %in% self$assignments$Well) {
         stop("'Treatment' row not found in assignments data frame.")
       }
@@ -111,18 +111,23 @@ ElectrodeBursts <- R6Class("ElectrodeBurst",
       # Get the treatment row
       treatment_row <- self$assignments[self$assignments$Well == "Treatment", ]
 
-      # Get all treatments passed as arguments
-      treatments <- list(...)
+      # Ensure control group is included in treatments_array
+      if (!(control_group %in% treatments_array)) {
+        treatments_array <- c(control_group, treatments_array)
+      } else {
+        treatments_array <- c(control_group, setdiff(treatments_array, control_group))
+      }
 
       # Function to create a single raster plot
-      create_raster <- function(wells, title, x_lim) {
+      create_raster <- function(wells, treatment_name, x_lim) {
         plot_data <- self$data %>%
           dplyr::mutate(
             Well = sub("_.*", "", Electrode),
             Electrode = sub(".*_", "", Electrode),
             `Time (s)` = as.numeric(`Time (s)`),
             `Size (spikes)` = as.numeric(`Size (spikes)`),
-            `Duration (s)` = as.numeric(`Duration (s)`)
+            `Duration (s)` = as.numeric(`Duration (s)`),
+            Treatment = treatment_name  # Add treatment name as a new column
           ) %>%
           dplyr::filter(Well %in% wells)
 
@@ -130,17 +135,21 @@ ElectrodeBursts <- R6Class("ElectrodeBurst",
         plot_data <- plot_data %>%
           dplyr::filter(!is.na(`Size (spikes)`) & is.finite(`Size (spikes)`))
 
+        # Sort the electrodes in ascending order
+        plot_data <- plot_data %>%
+          dplyr::arrange(Electrode)
+
         if (nrow(plot_data) == 0) {
-          stop(paste("No valid data for", title))
+          stop(paste("No valid data for", treatment_name))
         }
 
         ggplot2::ggplot(plot_data, ggplot2::aes(x = `Time (s)`, y = Electrode)) +
           ggplot2::geom_tile(ggplot2::aes(width = `Duration (s)`, height = 0.8, fill = `Size (spikes)`)) +
-          ggplot2::facet_grid(Well ~ ., scales = "free_y", space = "free_y") +
+          ggplot2::facet_grid(Treatment ~ Well, scales = "free_y", space = "free_y") +  # Facet by treatment and well
           ggplot2::scale_fill_gradient(low = "red", high = "black") +
-          ggplot2::scale_y_discrete(limits = rev(unique(plot_data$Electrode))) +
+          ggplot2::scale_y_discrete(limits = unique(plot_data$Electrode)) +  # Ensure sorted order
           ggplot2::scale_x_continuous(limits = x_lim) +  # Set consistent x-axis limits
-          ggplot2::labs(x = NULL, y = "Electrode", fill = "Spike Size", title = title) +
+          ggplot2::labs(x = NULL, y = "Electrode", fill = "Spike Size") +
           ggplot2::theme_minimal() +
           ggplot2::theme(
             axis.text.y = ggplot2::element_text(size = 6),
@@ -153,7 +162,7 @@ ElectrodeBursts <- R6Class("ElectrodeBurst",
       }
 
       # Prepare data for all treatments
-      all_data <- lapply(treatments, function(treatment) {
+      all_data <- lapply(treatments_array, function(treatment) {
         wells <- names(treatment_row)[treatment_row == treatment]
         if (length(wells) == 0) {
           stop(paste("Treatment '", treatment, "' not found in assignments data."))
@@ -175,18 +184,19 @@ ElectrodeBursts <- R6Class("ElectrodeBurst",
       plot_list <- mapply(function(treatment, data) {
         wells <- names(treatment_row)[treatment_row == treatment]
         create_raster(wells, treatment, x_lim)
-      }, treatments, all_data, SIMPLIFY = FALSE)
+      }, treatments_array, all_data, SIMPLIFY = FALSE)
 
       # Combine plots vertically
       combined_plot <- ggpubr::ggarrange(
         plotlist = plot_list,
-        ncol = 1, nrow = length(treatments),
+        ncol = 1, nrow = length(treatments_array),
         common.legend = TRUE, legend = "right",
-        heights = rep(1, length(treatments))
+        heights = rep(1, length(treatments_array))
       )
 
-      # Add overall x-axis label
+      # Add overall title and x-axis label
       combined_plot <- ggpubr::annotate_figure(combined_plot,
+                                               top = ggpubr::text_grob(plot_title, size = 14, face = "bold"),
                                                bottom = ggpubr::text_grob("Time (s)", size = 12))
 
       return(combined_plot)
@@ -194,18 +204,4 @@ ElectrodeBursts <- R6Class("ElectrodeBurst",
   )
 )
 
-# Creating an object of the class Person
-bursts <- ElectrodeBursts$new('/Users/stevensu/Desktop/Korb Lab/MEA Analysis/Steven_MEA/ra nxn and Sean 6-4-24/Plate 1/6-04-24 nxn DIV 11 PLATE 1(002)(000)_electrode_burst_list.csv')
-data <- bursts$data
-assignments <- bursts$assignments
 
-
-# Generate the raster plot for a specific treatment
-raster_plot <- bursts$create_raster_plot("Luciferase-WT")
-
-# Display the plot
-print(raster_plot)
-
-comparison_plot <- bursts$create_comparison_raster_plot("NEG Control-WT", 'NEG Control-HET')
-
-print(comparison_plot)

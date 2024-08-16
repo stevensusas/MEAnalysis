@@ -62,7 +62,7 @@ for (file in plate1_5min) {
     title = sub("\\.csv$", "", title)
     plot = plot$treatment_averages_t_test_plot(control, samples, title)
     setwd('/Users/stevensu/Desktop/Korb Lab/MEA Analysis/Rili Dataset Final Results/Plate 1 Barplots 5 Min/NEG v HET')
-    ggsave(paste(title, '.png', sep = ""), plot = plot, width = 15, height = 15, dpi = 300)
+    ggsave(paste(title, '.pdf', sep = ""), plot = plot, width = 15, height = 15, dpi = 300)
   }, error = function(e) {
     cat("Error in file:", file, "\nMessage:", e$message, "\n")
   })
@@ -77,7 +77,7 @@ for (file in plate1_5min) {
     title = sub("\\.csv$", "", title)
     plot = plot$treatment_averages_t_test_plot(control, samples, title)
     setwd('/Users/stevensu/Desktop/Korb Lab/MEA Analysis/Rili Dataset Final Results/Plate 1 Barplots 5 Min/LUC HET v DEP HET')
-    ggsave(paste(title, '.png', sep = ""), plot = plot, width = 20, height = 20, dpi = 300)
+    ggsave(paste(title, '.pdf', sep = ""), plot = plot, width = 20, height = 20, dpi = 300)
   }, error = function(e) {
     cat("Error in file:", file, "\nMessage:", e$message, "\n")
   })
@@ -92,7 +92,7 @@ for (file in plate1_5min) {
     title = sub("\\.csv$", "", title)
     plot = plot$treatment_averages_t_test_plot(control, samples, title)
     setwd('/Users/stevensu/Desktop/Korb Lab/MEA Analysis/Rili Dataset Final Results/Plate 1 Barplots 5 Min/LUC WT v DEP WT')
-    ggsave(paste(title, '.png', sep = ""), plot = plot, width = 20, height = 20, dpi = 300)
+    ggsave(paste(title, '.pdf', sep = ""), plot = plot, width = 20, height = 20, dpi = 300)
   }, error = function(e) {
     cat("Error in file:", file, "\nMessage:", e$message, "\n")
   })
@@ -107,7 +107,7 @@ for (file in plate1_30min) {
     title = sub("\\.csv$", "", title)
     plot = plot$treatment_averages_t_test_plot(control, samples, title)
     setwd('/Users/stevensu/Desktop/Korb Lab/MEA Analysis/Rili Dataset Final Results/Plate 1 Barplots 30 Min/NEG v HET')
-    ggsave(paste(title, '.png', sep = ""), plot = plot, width = 15, height = 15, dpi = 300)
+    ggsave(paste(title, '.pdf', sep = ""), plot = plot, width = 15, height = 15, dpi = 300)
   }, error = function(e) {
     cat("Error in file:", file, "\nMessage:", e$message, "\n")
   })
@@ -122,7 +122,7 @@ for (file in plate1_30min) {
     title = sub("\\.csv$", "", title)
     plot = plot$treatment_averages_t_test_plot(control, samples, title)
     setwd('/Users/stevensu/Desktop/Korb Lab/MEA Analysis/Rili Dataset Final Results/Plate 1 Barplots 30 Min/LUC HET v DEP HET')
-    ggsave(paste(title, '.png', sep = ""), plot = plot, width = 20, height = 20, dpi = 300)
+    ggsave(paste(title, '.pdf', sep = ""), plot = plot, width = 20, height = 20, dpi = 300)
   }, error = function(e) {
     cat("Error in file:", file, "\nMessage:", e$message, "\n")
   })
@@ -137,7 +137,7 @@ for (file in plate1_30min) {
     title = sub("\\.csv$", "", title)
     plot = plot$treatment_averages_t_test_plot(control, samples, title)
     setwd('/Users/stevensu/Desktop/Korb Lab/MEA Analysis/Rili Dataset Final Results/Plate 1 Barplots 30 Min/LUC WT v DEP WT')
-    ggsave(paste(title, '.png', sep = ""), plot = plot, width = 20, height = 20, dpi = 300)
+    ggsave(paste(title, '.pdf', sep = ""), plot = plot, width = 20, height = 20, dpi = 300)
   }, error = function(e) {
     cat("Error in file:", file, "\nMessage:", e$message, "\n")
   })
@@ -152,7 +152,7 @@ for (file in plate3_5min) {
     title = sub("\\.csv$", "", title)
     plot = plot$treatment_averages_t_test_plot(control, samples, title)
     setwd('/Users/stevensu/Desktop/Korb Lab/MEA Analysis/Rili Dataset Final Results/Plate 3 Barplots 5 Min/NEG v HET')
-    ggsave(paste(title, '.png', sep = ""), plot = plot, width = 15, height = 15, dpi = 300)
+    ggsave(paste(title, '.pdf', sep = ""), plot = plot, width = 15, height = 15, dpi = 300)
   }, error = function(e) {
     cat("Error in file:", file, "\nMessage:", e$message, "\n")
   })
@@ -167,7 +167,7 @@ for (file in plate3_5min) {
     title = sub("\\.csv$", "", title)
     plot = plot$treatment_averages_t_test_plot(control, samples, title)
     setwd('/Users/stevensu/Desktop/Korb Lab/MEA Analysis/Rili Dataset Final Results/Plate 3 Barplots 5 Min/LUC HET v DEP HET')
-    ggsave(paste(title, '.png', sep = ""), plot = plot, width = 20, height = 20, dpi = 300)
+    ggsave(paste(title, '.pdf', sep = ""), plot = plot, width = 20, height = 20, dpi = 300)
   }, error = function(e) {
     cat("Error in file:", file, "\nMessage:", e$message, "\n")
   })
@@ -182,7 +182,7 @@ for (file in plate3_30min) {
     title = sub("\\.csv$", "", title)
     plot = plot$treatment_averages_t_test_plot(control, samples, title)
     setwd('/Users/stevensu/Desktop/Korb Lab/MEA Analysis/Rili Dataset Final Results/Plate 3 Barplots 30 Min/NEG v HET')
-    ggsave(paste(title, '.png', sep = ""), plot = plot, width = 15, height = 15, dpi = 300)
+    ggsave(paste(title, '.pdf', sep = ""), plot = plot, width = 15, height = 15, dpi = 300)
   }, error = function(e) {
     cat("Error in file:", file, "\nMessage:", e$message, "\n")
   })
@@ -197,7 +197,7 @@ for (file in plate3_30min) {
     title = sub("\\.csv$", "", title)
     plot = plot$treatment_averages_t_test_plot(control, samples, title)
     setwd('/Users/stevensu/Desktop/Korb Lab/MEA Analysis/Rili Dataset Final Results/Plate 3 Barplots 30 Min/LUC HET v DEP HET')
-    ggsave(paste(title, '.png', sep = ""), plot = plot, width = 20, height = 20, dpi = 300)
+    ggsave(paste(title, '.pdf', sep = ""), plot = plot, width = 20, height = 20, dpi = 300)
   }, error = function(e) {
     cat("Error in file:", file, "\nMessage:", e$message, "\n")
   })
