@@ -24,7 +24,7 @@ After installation, load the package in your R session:
 
 ```R
 
-library(MEAAnalysis)
+library(MEAnalysis)
 
 ```
 
