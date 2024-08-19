@@ -143,20 +143,6 @@ plot <- electrode_bursts$create_comparison_raster_plot(
 # plot is a ggpubr object
 ```
 
-## Requirements
-
-This package requires R and the following libraries:
-- ggplot2
-- dplyr
-- tidyr
-- ggpubr
-
-Make sure to install these dependencies before using the package:
-
-```R
-install.packages(c("ggplot2", "dplyr", "tidyr", "ggpubr"))
-```
-
 ## Contributing
 
 Contributions to improve the package are welcome. Please submit issues and pull requests on the project's GitHub repository.
