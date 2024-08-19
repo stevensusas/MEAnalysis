@@ -24,6 +24,7 @@ library(roxygen2)
 #' @import scales
 #' @import forcats
 #' @import roxygen2
+#' @importFrom readr read_csv
 #' @export
 ElectrodeBursts <- R6Class("ElectrodeBursts",
                            inherit = MEAnalysis,  # Inherit from MEAnalysis
