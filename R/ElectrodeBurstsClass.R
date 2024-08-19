@@ -85,6 +85,42 @@ ElectrodeBursts <- R6Class(
     },
     
     #' @description
+    #' Find First Occurrence
+    #'
+    #' This method finds the first occurrence of a specific substring in the data frame.
+    #' @param df The data frame to search in.
+    #' @param substring_to_find The substring to search for.
+    #' @return The row number of the first occurrence or NA if not found.
+    #' @export
+    find_first_occurrence = function(df, substring_to_find) {
+      df_char <- apply(df, 1, paste, collapse = " ")
+      line_number <- which(grepl(substring_to_find, df_char))[1]
+      if (!is.na(line_number)) {
+        return(line_number)
+      } else {
+        return(NA)
+      }
+    },
+    
+    #' @description
+    #' Subset by Range
+    #'
+    #' This method subsets a data frame based on the specified row range.
+    #' @param df The data frame to subset.
+    #' @param start_row The starting row number.
+    #' @param end_row The ending row number.
+    #' @return A subset of the data frame.
+    #' @export
+    subset_by_range = function(df, start_row, end_row) {
+      if (start_row < 1 || end_row > nrow(df) || start_row > end_row) {
+        stop("Invalid row range")
+      }
+      subset_df <- df[start_row:end_row, ]
+      return(subset_df)
+    },
+    
+    
+    #' @description
     #' Get Sample Assignments
     #'
     #' This method returns the processed sample assignments.
