@@ -99,7 +99,7 @@ MEAnalysis <- R6Class(
     #' @return An object of class MEAnalysis.
     #' @export
     initialize = function(path_to_file) {
-      self$raw_df <- read_csv(path_to_file)
+      self$raw_df <- readr::read_csv(path_to_file)
       self$sample_assignments <- self$get_sample_assignments(self$raw_df)
       self$treatment_list <- self$get_treatment_list(self$raw_df)
       self$treatment_averages <- self$get_treatment_averages(self$raw_df)

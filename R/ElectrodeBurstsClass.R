@@ -45,7 +45,7 @@ ElectrodeBursts <- R6Class("ElectrodeBursts",
                              #' @return An object of class ElectrodeBursts.
                              #' 
                              initialize = function(filepath) {
-                               df = read_csv(filepath)
+                               df = readr::read_csv(filepath)
                                
                                # Process assignments
                                start_row <- find_first_occurrence(df, "Well Information") + 1
