@@ -1,4 +1,4 @@
-***To install and use in R:***
+**To install and use in R:**
 
 install.packages("devtools")
 
