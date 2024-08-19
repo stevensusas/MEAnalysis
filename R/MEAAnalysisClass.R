@@ -6,8 +6,8 @@ library(tidyr)
 library(ggplot2)
 library(roxygen2)
 
-#' @title MEAAnalysis Class
-#' @name MEAAnalysis
+#' @title MEAnalysis Class
+#' @name MEAnalysis
 #' @description This class processes Microelectrode Array (MEA) data, including
 #' sample assignments, treatment averages, well averages, and electrode averages.
 #' It also provides methods for performing statistical analysis and creating plots.
