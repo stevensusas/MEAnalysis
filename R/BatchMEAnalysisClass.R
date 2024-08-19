@@ -14,7 +14,15 @@ library(roxygen2)
 #' @description This class extends the `MEAnalysis` class to handle batch processing
 #' of MEA data files. It includes methods for processing files,
 #' generating plots, and performing statistical analysis.
-#'
+#' @import R6
+#' @import dplyr
+#' @import tidyr
+#' @import purrr
+#' @import readr
+#' @import ggplot2
+#' @import scales
+#' @import forcats
+#' @import roxygen2
 #' @export
 BatchMEAnalysis <- R6Class(
   "BatchMEAnalysis",

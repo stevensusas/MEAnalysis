@@ -11,7 +11,12 @@ library(roxygen2)
 #' @description This class processes Microelectrode Array (MEA) data, including
 #' sample assignments, treatment averages, well averages, and electrode averages.
 #' It also provides methods for performing statistical analysis and creating plots.
-#' 
+#' @import R6
+#' @import dplyr
+#' @import tidyr
+#' @import readr
+#' @import ggplot2
+#' @import roxygen2
 #' @export
 MEAnalysis <- R6Class(
   "MEAnalysis",

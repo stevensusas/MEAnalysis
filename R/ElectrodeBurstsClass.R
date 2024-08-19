@@ -15,7 +15,15 @@ library(roxygen2)
 #' @description This class processes MEA data related to electrode bursts, including
 #' sample assignments and burst data. It provides methods to create raster plots
 #' and comparison plots across different treatments.
-#'
+#' @import R6
+#' @import dplyr
+#' @import tidyr
+#' @import purrr
+#' @import readr
+#' @import ggplot2
+#' @import scales
+#' @import forcats
+#' @import roxygen2
 #' @export
 ElectrodeBursts <- R6Class("ElectrodeBursts",
                            inherit = MEAnalysis,  # Inherit from MEAnalysis
