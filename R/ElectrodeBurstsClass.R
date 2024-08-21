@@ -48,9 +48,9 @@ ElectrodeBursts <- R6Class(
       df <- read_csv(filepath)
       
       # Process assignments
-      start_row <- find_first_occurrence(df, "Well Information") + 1
-      end_row <- find_first_occurrence(df, "Concentration")
-      assignments <- subset_by_range(df, start_row, end_row)
+      start_row <- self$find_first_occurrence(df, "Well Information") + 1
+      end_row <- self$find_first_occurrence(df, "Concentration")
+      assignments <- self$subset_by_range(df, start_row, end_row)
       last_column_name <- names(assignments)[ncol(assignments)]
       
       # Split the last column into multiple columns
@@ -77,10 +77,27 @@ ElectrodeBursts <- R6Class(
       self$assignments <- assignments
       
       start_row <- 1
-      end_row <- find_first_occurrence(df, "Well Information") - 1
-      data <- subset_by_range(df, start_row, end_row)
+      end_row <- self$find_first_occurrence(df, "Well Information") - 1
+      data <- self$subset_by_range(df, start_row, end_row)
       data <- data[, -c(1, 2)]
       self$data <- data
+    },
+    
+    #' @description
+    #' Subset by Range
+    #'
+    #' This method subsets a data frame based on the specified row range.
+    #' @param df The data frame to subset.
+    #' @param start_row The starting row number.
+    #' @param end_row The ending row number.
+    #' @return A subset of the data frame.
+    #' @export
+    subset_by_range = function(df, start_row, end_row) {
+      if (start_row < 1 || end_row > nrow(df) || start_row > end_row) {
+        stop("Invalid row range")
+      }
+      subset_df <- df[start_row:end_row, ]
+      return(subset_df)
     },
     
     

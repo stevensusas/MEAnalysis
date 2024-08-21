@@ -24,6 +24,7 @@ and comparison plots across different treatments.
 \subsection{Public methods}{
 \itemize{
 \item \href{#method-ElectrodeBursts-new}{\code{ElectrodeBursts$new()}}
+\item \href{#method-ElectrodeBursts-subset_by_range}{\code{ElectrodeBursts$subset_by_range()}}
 \item \href{#method-ElectrodeBursts-get_sample_assignment}{\code{ElectrodeBursts$get_sample_assignment()}}
 \item \href{#method-ElectrodeBursts-get_data}{\code{ElectrodeBursts$get_data()}}
 \item \href{#method-ElectrodeBursts-create_raster_plot}{\code{ElectrodeBursts$create_raster_plot()}}
@@ -42,7 +43,6 @@ and comparison plots across different treatments.
 <li><span class="pkg-link" data-pkg="MEAnalysis" data-topic="MEAnalysis" data-id="get_treatment_list"><a href='../../MEAnalysis/html/MEAnalysis.html#method-MEAnalysis-get_treatment_list'><code>MEAnalysis::MEAnalysis$get_treatment_list()</code></a></span></li>
 <li><span class="pkg-link" data-pkg="MEAnalysis" data-topic="MEAnalysis" data-id="get_well_averages"><a href='../../MEAnalysis/html/MEAnalysis.html#method-MEAnalysis-get_well_averages'><code>MEAnalysis::MEAnalysis$get_well_averages()</code></a></span></li>
 <li><span class="pkg-link" data-pkg="MEAnalysis" data-topic="MEAnalysis" data-id="perform_t_tests"><a href='../../MEAnalysis/html/MEAnalysis.html#method-MEAnalysis-perform_t_tests'><code>MEAnalysis::MEAnalysis$perform_t_tests()</code></a></span></li>
-<li><span class="pkg-link" data-pkg="MEAnalysis" data-topic="MEAnalysis" data-id="subset_by_range"><a href='../../MEAnalysis/html/MEAnalysis.html#method-MEAnalysis-subset_by_range'><code>MEAnalysis::MEAnalysis$subset_by_range()</code></a></span></li>
 <li><span class="pkg-link" data-pkg="MEAnalysis" data-topic="MEAnalysis" data-id="treatment_averages_t_test_plot"><a href='../../MEAnalysis/html/MEAnalysis.html#method-MEAnalysis-treatment_averages_t_test_plot'><code>MEAnalysis::MEAnalysis$treatment_averages_t_test_plot()</code></a></span></li>
 </ul>
 </details>
@@ -68,6 +68,32 @@ It reads and processes the MEA data and assignments from the file.
 }
 \subsection{Returns}{
 An object of class ElectrodeBursts.
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-ElectrodeBursts-subset_by_range"></a>}}
+\if{latex}{\out{\hypertarget{method-ElectrodeBursts-subset_by_range}{}}}
+\subsection{Method \code{subset_by_range()}}{
+Subset by Range
+
+This method subsets a data frame based on the specified row range.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{ElectrodeBursts$subset_by_range(df, start_row, end_row)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{df}}{The data frame to subset.}
+
+\item{\code{start_row}}{The starting row number.}
+
+\item{\code{end_row}}{The ending row number.}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+A subset of the data frame.
 }
 }
 \if{html}{\out{<hr>}}
