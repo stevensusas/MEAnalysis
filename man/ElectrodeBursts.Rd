@@ -24,6 +24,7 @@ and comparison plots across different treatments.
 \subsection{Public methods}{
 \itemize{
 \item \href{#method-ElectrodeBursts-new}{\code{ElectrodeBursts$new()}}
+\item \href{#method-ElectrodeBursts-find_first_occurrence}{\code{ElectrodeBursts$find_first_occurrence()}}
 \item \href{#method-ElectrodeBursts-subset_by_range}{\code{ElectrodeBursts$subset_by_range()}}
 \item \href{#method-ElectrodeBursts-get_sample_assignment}{\code{ElectrodeBursts$get_sample_assignment()}}
 \item \href{#method-ElectrodeBursts-get_data}{\code{ElectrodeBursts$get_data()}}
@@ -36,7 +37,6 @@ and comparison plots across different treatments.
 <details><summary>Inherited methods</summary>
 <ul>
 <li><span class="pkg-link" data-pkg="MEAnalysis" data-topic="MEAnalysis" data-id="create_combined_t_test_plot"><a href='../../MEAnalysis/html/MEAnalysis.html#method-MEAnalysis-create_combined_t_test_plot'><code>MEAnalysis::MEAnalysis$create_combined_t_test_plot()</code></a></span></li>
-<li><span class="pkg-link" data-pkg="MEAnalysis" data-topic="MEAnalysis" data-id="find_first_occurrence"><a href='../../MEAnalysis/html/MEAnalysis.html#method-MEAnalysis-find_first_occurrence'><code>MEAnalysis::MEAnalysis$find_first_occurrence()</code></a></span></li>
 <li><span class="pkg-link" data-pkg="MEAnalysis" data-topic="MEAnalysis" data-id="get_electrode_averages"><a href='../../MEAnalysis/html/MEAnalysis.html#method-MEAnalysis-get_electrode_averages'><code>MEAnalysis::MEAnalysis$get_electrode_averages()</code></a></span></li>
 <li><span class="pkg-link" data-pkg="MEAnalysis" data-topic="MEAnalysis" data-id="get_sample_assignments"><a href='../../MEAnalysis/html/MEAnalysis.html#method-MEAnalysis-get_sample_assignments'><code>MEAnalysis::MEAnalysis$get_sample_assignments()</code></a></span></li>
 <li><span class="pkg-link" data-pkg="MEAnalysis" data-topic="MEAnalysis" data-id="get_treatment_averages"><a href='../../MEAnalysis/html/MEAnalysis.html#method-MEAnalysis-get_treatment_averages'><code>MEAnalysis::MEAnalysis$get_treatment_averages()</code></a></span></li>
@@ -68,6 +68,30 @@ It reads and processes the MEA data and assignments from the file.
 }
 \subsection{Returns}{
 An object of class ElectrodeBursts.
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-ElectrodeBursts-find_first_occurrence"></a>}}
+\if{latex}{\out{\hypertarget{method-ElectrodeBursts-find_first_occurrence}{}}}
+\subsection{Method \code{find_first_occurrence()}}{
+Find First Occurrence
+
+This method finds the first occurrence of a specific substring in the data frame.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{ElectrodeBursts$find_first_occurrence(df, substring_to_find)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{df}}{The data frame to search in.}
+
+\item{\code{substring_to_find}}{The substring to search for.}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+The row number of the first occurrence or NA if not found.
 }
 }
 \if{html}{\out{<hr>}}

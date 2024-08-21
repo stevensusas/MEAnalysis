@@ -84,6 +84,24 @@ ElectrodeBursts <- R6Class(
     },
     
     #' @description
+    #' Find First Occurrence
+    #'
+    #' This method finds the first occurrence of a specific substring in the data frame.
+    #' @param df The data frame to search in.
+    #' @param substring_to_find The substring to search for.
+    #' @return The row number of the first occurrence or NA if not found.
+    #' @export
+    find_first_occurrence = function(df, substring_to_find) {
+      df_char <- apply(df, 1, paste, collapse = " ")
+      line_number <- which(grepl(substring_to_find, df_char))[1]
+      if (!is.na(line_number)) {
+        return(line_number)
+      } else {
+        return(NA)
+      }
+    },
+    
+    #' @description
     #' Subset by Range
     #'
     #' This method subsets a data frame based on the specified row range.
