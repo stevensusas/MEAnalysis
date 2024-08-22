@@ -1,5 +1,7 @@
-source('/Users/stevensu/Desktop/Korb Lab/MEA Analysis/Korb-MEA/Class/ElectrodeBurstsClass.R')
-
+library(MEAnalysis)
+library(readr)
+library(dplyr)
+library(ggplot2)
 plate1_5min <- c(
   "/Users/stevensu/Desktop/Korb Lab/MEA Analysis/Steven_MEA/ra nxn and Sean 6-18-24 div 25/Plate 1/Plate 1 DIV 24 Min 5 Bursts.csv",
   "/Users/stevensu/Desktop/Korb Lab/MEA Analysis/Steven_MEA/ra nxn and Sean 6-15-24 DIV 22/Plate 1/Plate 1 DIV 22 Min 5 Bursts.csv",
@@ -12,7 +14,13 @@ plate1_5min <- c(
   "/Users/stevensu/Desktop/Korb Lab/MEA Analysis/Steven_MEA/ra nxn and Sean 6-7-24/Plate 1/Plate 1 DIV 14 Min 5 Bursts.csv",
   "/Users/stevensu/Desktop/Korb Lab/MEA Analysis/Steven_MEA/ra nxn and Sean 6-6-24/Plate 1/Plate 1 DIV 13 Min 5 Bursts.csv",
   "/Users/stevensu/Desktop/Korb Lab/MEA Analysis/Steven_MEA/ra nxn and Sean 6-5-24/Plate 1/Plate 1 DIV 12 Min 5 Bursts.csv",
-  "/Users/stevensu/Desktop/Korb Lab/MEA Analysis/Steven_MEA/ra nxn and Sean 6-4-24/Plate 1/Plate 1 DIV 11 Min 5 Bursts.csv"
+  "/Users/stevensu/Desktop/Korb Lab/MEA Analysis/Steven_MEA/ra nxn and Sean 6-4-24/Plate 1/Plate 1 DIV 11 Min 5 Bursts.csv",
+  "/Users/stevensu/Desktop/Steven Supplementary MEA/DIV 17 Plate 1 5 Min/Plate 1 DIV 17 Min 5 Bursts.csv",
+  "/Users/stevensu/Desktop/Steven Supplementary MEA/DIV 18 Plate 1 5 Min/Plate 1 DIV 18 Min 5 Bursts.csv",
+  "/Users/stevensu/Desktop/Steven Supplementary MEA/DIV 20 Plate 1 5 Min/Plate 1 DIV 20 Min 5 Bursts.csv",
+  "/Users/stevensu/Desktop/Steven Supplementary MEA/DIV 24 Plate 1 5 Min/Plate 1 DIV 24 Min 5 Bursts.csv",
+  "/Users/stevensu/Desktop/Steven Supplementary MEA/DIV 21 Plate1 5 Min/Plate 1 DIV 21 Min 5 Bursts.csv",
+  "/Users/stevensu/Desktop/Steven Supplementary MEA/DIV 22 Plate 1 5 Min/Plate 1 DIV 22 Min 5 Bursts.csv"
 )
 
 plate1_30min <- c(
@@ -21,7 +29,9 @@ plate1_30min <- c(
   "/Users/stevensu/Desktop/Korb Lab/MEA Analysis/Steven_MEA/ra nxn and Sean 6-15-24 DIV 22/Plate 1/Plate 1 DIV 22 Min 30 Bursts.csv",
   "/Users/stevensu/Desktop/Korb Lab/MEA Analysis/Steven_MEA/ra nxn and Sean 6-14-24 DIV 21/Plate 1/Plate 1 DIV 21 Min 30 Bursts.csv",
   "/Users/stevensu/Desktop/Korb Lab/MEA Analysis/Steven_MEA/ra nxn and Sean 6-13-24 DIV 20/Plate 1/Plate 1 DIV 20 Min 30 Bursts.csv",
-  "/Users/stevensu/Desktop/Korb Lab/MEA Analysis/Steven_MEA/ra nxn and Sean 6-11-24/Plate 1/Plate 1 DIV 18 Min 30 Bursts.csv"
+  "/Users/stevensu/Desktop/Korb Lab/MEA Analysis/Steven_MEA/ra nxn and Sean 6-11-24/Plate 1/Plate 1 DIV 18 Min 30 Bursts.csv",
+  "/Users/stevensu/Desktop/Steven Supplementary MEA/DIV 22 Plate 1 30 Min/Plate 1 DIV 22 Min 30 Burst.csv",
+  "/Users/stevensu/Desktop/Steven Supplementary MEA/DIV 21 Plate 1 30 Min/Plate 1 DIV 21 Min 30 Burst.csv"
 )
 
 plate3_5min <- c(

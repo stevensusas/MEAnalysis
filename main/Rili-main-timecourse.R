@@ -1,6 +1,5 @@
-source('/Users/stevensu/Desktop/Korb Lab/MEA Analysis/Korb-MEA/MEAAnalysisClass.R')
-source('/Users/stevensu/Desktop/Korb Lab/MEA Analysis/Korb-MEA/BatchMEAnalysisClass.R')
-
+library(MEAnalysis)
+library(ggplot2)
 plate1_5min <- c(
   "/Users/stevensu/Desktop/Korb Lab/MEA Analysis/Steven_MEA/ra nxn and Sean 6-4-24/Plate 1/Plate 1 DIV 11 5 Min.csv",
   "/Users/stevensu/Desktop/Korb Lab/MEA Analysis/Steven_MEA/ra nxn and Sean 6-5-24/Plate 1/Plate 1 DIV 12 5 Min.csv",
@@ -13,7 +12,8 @@ plate1_5min <- c(
   "/Users/stevensu/Desktop/Korb Lab/MEA Analysis/Steven_MEA/ra nxn and Sean 6-14-24 DIV 21/Plate 1/Plate 1 DIV 21 5 Min.csv",
   "/Users/stevensu/Desktop/Korb Lab/MEA Analysis/Steven_MEA/ra nxn and Sean 6-15-24 DIV 22/Plate 1/Plate 1 DIV 22 5 Min.csv",
   "/Users/stevensu/Desktop/Korb Lab/MEA Analysis/Steven_MEA/ra nxn and Sean 6-17-24/Plate 1/Plate 1 DIV 24 5 Min.csv",
-  "/Users/stevensu/Desktop/Korb Lab/MEA Analysis/Steven_MEA/ra nxn and Sean 6-18-24 div 25/Plate 1/Plate 1 DIV 25 5 Min.csv"
+  "/Users/stevensu/Desktop/Korb Lab/MEA Analysis/Steven_MEA/ra nxn and Sean 6-18-24 div 25/Plate 1/Plate 1 DIV 25 5 Min.csv",
+  "/Users/stevensu/Desktop/Steven Supplementary MEA/DIV 18 Plate 1 5 Min/Plate 1 DIV 18 Min 5.csv"
 )
 
 plate1_30min <- c(
@@ -24,6 +24,8 @@ plate1_30min <- c(
   "/Users/stevensu/Desktop/Korb Lab/MEA Analysis/Steven_MEA/ra nxn and Sean 6-17-24/Plate 1/Plate 1 DIV 24 30 Min.csv",
   "/Users/stevensu/Desktop/Korb Lab/MEA Analysis/Steven_MEA/ra nxn and Sean 6-18-24 div 25/Plate 1/Plate 1 DIV 25 30 Min.csv"
 )
+
+
 
 plate3_5min <- c(
   "/Users/stevensu/Desktop/Korb Lab/MEA Analysis/Steven_MEA/ra nxn and Sean 6-4-24/Plate 3/Plate 3 DIV 11 5 Min.csv",

@@ -218,47 +218,52 @@ ElectrodeBursts <- R6Class(
         treatments_array <- c(control_group, setdiff(treatments_array, control_group))
       }
       
-      # Function to create a single raster plot
       create_raster <- function(wells, treatment_name, x_lim) {
-        plot_data <- self$data %>%
-          dplyr::mutate(
-            Well = sub("_.*", "", Electrode),
-            Electrode = sub(".*_", "", Electrode),
-            `Time (s)` = as.numeric(`Time (s)`),
-            `Size (spikes)` = as.numeric(`Size (spikes)`),
-            `Duration (s)` = as.numeric(`Duration (s)`),
-            Treatment = treatment_name  # Add treatment name as a new column
-          ) %>%
-          dplyr::filter(Well %in% wells)
-        
-        # Remove rows with NA or non-finite values
-        plot_data <- plot_data %>%
-          dplyr::filter(!is.na(`Size (spikes)`) & is.finite(`Size (spikes)`))
-        
-        # Sort the electrodes in ascending order
-        plot_data <- plot_data %>%
-          dplyr::arrange(Electrode)
-        
-        if (nrow(plot_data) == 0) {
-          stop(paste("No valid data for", treatment_name))
-        }
-        
-        ggplot2::ggplot(plot_data, ggplot2::aes(x = `Time (s)`, y = Electrode)) +
-          ggplot2::geom_tile(ggplot2::aes(width = `Duration (s)`, height = 0.8, fill = `Size (spikes)`)) +
-          ggplot2::facet_grid(Treatment ~ Well, scales = "free_y", space = "free_y") +  # Facet by treatment and well
-          ggplot2::scale_fill_gradient(low = "red", high = "black") +
-          ggplot2::scale_y_discrete(limits = unique(plot_data$Electrode)) +  # Ensure sorted order
-          ggplot2::scale_x_continuous(limits = x_lim) +  # Set consistent x-axis limits
-          ggplot2::labs(x = NULL, y = "Electrode", fill = "Spike Size") +
-          ggplot2::theme_minimal() +
-          ggplot2::theme(
-            axis.text.y = ggplot2::element_text(size = 6),
-            strip.text = ggplot2::element_text(size = 10, face = "bold"),
-            panel.spacing = ggplot2::unit(1, "lines"),
-            panel.background = ggplot2::element_rect(fill = "white", color = NA),
-            plot.background = ggplot2::element_rect(fill = "white", color = NA),
-            plot.title = ggplot2::element_text(hjust = 0.5, face = "bold")
-          )
+        tryCatch({
+          plot_data <- self$data %>%
+            dplyr::mutate(
+              Well = sub("_.*", "", Electrode),
+              Electrode = sub(".*_", "", Electrode),
+              `Time (s)` = as.numeric(`Time (s)`),
+              `Size (spikes)` = as.numeric(`Size (spikes)`),
+              `Duration (s)` = as.numeric(`Duration (s)`),
+              Treatment = treatment_name  # Add treatment name as a new column
+            ) %>%
+            dplyr::filter(Well %in% wells)
+          
+          # Remove rows with NA or non-finite values
+          plot_data <- plot_data %>%
+            dplyr::filter(!is.na(`Size (spikes)`) & is.finite(`Size (spikes)`))
+          
+          # Sort the electrodes in ascending order
+          plot_data <- plot_data %>%
+            dplyr::arrange(Electrode)
+          
+          if (nrow(plot_data) == 0) {
+            warning(paste("No valid data for", treatment_name))
+            return(NULL)  # Return NULL instead of stopping the program
+          }
+          
+          ggplot2::ggplot(plot_data, ggplot2::aes(x = `Time (s)`, y = Electrode)) +
+            ggplot2::geom_tile(ggplot2::aes(width = `Duration (s)`, height = 0.8, fill = `Size (spikes)`)) +
+            ggplot2::facet_grid(Treatment ~ Well, scales = "free_y", space = "free_y") +  # Facet by treatment and well
+            ggplot2::scale_fill_gradient(low = "red", high = "black") +
+            ggplot2::scale_y_discrete(limits = unique(plot_data$Electrode)) +  # Ensure sorted order
+            ggplot2::scale_x_continuous(limits = x_lim) +  # Set consistent x-axis limits
+            ggplot2::labs(x = NULL, y = "Electrode", fill = "Spike Size") +
+            ggplot2::theme_minimal() +
+            ggplot2::theme(
+              axis.text.y = ggplot2::element_text(size = 6),
+              strip.text = ggplot2::element_text(size = 10, face = "bold"),
+              panel.spacing = ggplot2::unit(1, "lines"),
+              panel.background = ggplot2::element_rect(fill = "white", color = NA),
+              plot.background = ggplot2::element_rect(fill = "white", color = NA),
+              plot.title = ggplot2::element_text(hjust = 0.5, face = "bold")
+            )
+        }, error = function(e) {
+          warning(paste("Error in create_raster for", treatment_name, ":", e$message))
+          return(NULL)  # Return NULL in case of any error
+        })
       }
       
       # Prepare data for all treatments
