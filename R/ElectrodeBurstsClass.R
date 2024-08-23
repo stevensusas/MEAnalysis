@@ -203,7 +203,7 @@ ElectrodeBursts <- R6Class(
     #' @return A ggpubr object representing the combined raster plots.
     #' 
     create_comparison_raster_plot = function(control_group, treatments_array, plot_title) {
-      create_raster = function(well, treatment, x_lim) {
+      create_raster = function(well, x_lim) {
         plot_data <- self$data %>%
           dplyr::mutate(
             Well = sub("_.*", "", Electrode),
@@ -224,15 +224,16 @@ ElectrodeBursts <- R6Class(
           ggplot2::scale_fill_gradient(low = "red", high = "black") +
           ggplot2::scale_y_discrete(limits = rev(unique(plot_data$Electrode))) +
           ggplot2::scale_x_continuous(limits = x_lim) +
-          ggplot2::labs(title = paste(treatment, "-", well), x = NULL, y = "Electrode", fill = "Spike Size") +
+          ggplot2::labs(title = well, x = NULL, y = "Electrode") +
           ggplot2::theme_minimal() +
           ggplot2::theme(
             axis.text.y = ggplot2::element_text(size = 6),
-            strip.text = ggplot2::element_text(size = 10, face = "bold"),
-            panel.spacing = ggplot2::unit(1, "lines"),
+            axis.title.y = ggplot2::element_text(size = 8),
+            plot.title = ggplot2::element_text(hjust = 0.5, size = 10),
+            panel.grid.major = ggplot2::element_line(color = "gray90"),
+            panel.grid.minor = ggplot2::element_blank(),
             panel.background = ggplot2::element_rect(fill = "white", color = NA),
-            plot.background = ggplot2::element_rect(fill = "white", color = NA),
-            plot.title = ggplot2::element_text(hjust = 0.5, size = 12, face = "bold")
+            plot.background = ggplot2::element_rect(fill = "white", color = NA)
           )
       }
       
@@ -290,40 +291,39 @@ ElectrodeBursts <- R6Class(
       # Create individual plots for each well of each treatment
       plot_list <- lapply(valid_treatments, function(treatment) {
         wells <- names(treatment_row)[treatment_row == treatment]
-        lapply(wells, function(well) create_raster(well, treatment, x_lim))
+        well_plots <- lapply(wells, function(well) create_raster(well, x_lim))
+        
+        # Combine the two well plots side by side
+        combined_plot <- ggpubr::ggarrange(
+          plotlist = well_plots,
+          ncol = 2,
+          nrow = 1,
+          common.legend = TRUE,
+          legend = "none"
+        )
+        
+        # Add the treatment name to the right
+        ggpubr::annotate_figure(
+          combined_plot,
+          right = ggpubr::text_grob(treatment, rot = 270, vjust = 0.5, size = 12)
+        )
       })
       
-      # Flatten the list of plots
-      plot_list <- unlist(plot_list, recursive = FALSE)
-      
-      # Remove NULL entries from plot_list
-      plot_list <- plot_list[!sapply(plot_list, is.null)]
-      
-      if (length(plot_list) == 0) {
-        warning("No valid plots created.")
-        return(NULL)
-      }
-      
-      # Calculate the number of rows and columns for the grid
-      n_treatments <- length(valid_treatments)
-      n_cols <- 2  # Two wells side by side
-      n_rows <- n_treatments
-      
-      # Combine plots
-      combined_plot <- ggpubr::ggarrange(
+      # Combine all treatment plots vertically
+      final_plot <- ggpubr::ggarrange(
         plotlist = plot_list,
-        ncol = n_cols, 
-        nrow = n_rows,
+        ncol = 1,
+        nrow = length(plot_list),
         common.legend = TRUE,
         legend = "right"
       )
       
       # Add overall title and x-axis label
-      combined_plot <- ggpubr::annotate_figure(combined_plot,
-                                               top = ggpubr::text_grob(plot_title, size = 14, face = "bold"),
-                                               bottom = ggpubr::text_grob("Time (s)", size = 12))
+      final_plot <- ggpubr::annotate_figure(final_plot,
+                                            top = ggpubr::text_grob(plot_title, size = 14, face = "bold"),
+                                            bottom = ggpubr::text_grob("Time (s)", size = 12))
       
-      return(combined_plot)
+      return(final_plot)
     }
   )
 )
