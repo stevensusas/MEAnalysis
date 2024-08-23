@@ -291,7 +291,7 @@ ElectrodeBursts <- R6Class(
       # Create individual plots for each treatment
       plot_list <- mapply(function(treatment, data) {
         wells <- names(treatment_row)[treatment_row == treatment]
-      create_raster(wells, treatment, x_lim)
+        create_raster(wells, treatment, x_lim)
       }, valid_treatments, all_data, SIMPLIFY = FALSE)
       
       # Remove NULL entries from plot_list
@@ -302,20 +302,25 @@ ElectrodeBursts <- R6Class(
         return(NULL)
       }
       
-      # Combine plots vertically
+      # Calculate the number of rows and columns for the grid
+      n_plots <- length(plot_list)
+      n_cols <- min(n_plots, 3)  # Maximum 3 plots per row
+      n_rows <- ceiling(n_plots / n_cols)
+      
+      # Combine plots horizontally and wrap to multiple rows if needed
       combined_plot <- ggpubr::ggarrange(
         plotlist = plot_list,
-        ncol = 1, 
-        nrow = length(plot_list),
-        common.legend = TRUE, 
+        ncol = n_cols, 
+        nrow = n_rows,
+        common.legend = TRUE,
         legend = "right",
-        heights = rep(1, length(plot_list))
+        widths = rep(1, n_cols),
+        heights = rep(1, n_rows)
       )
       
-      # Add overall title and x-axis label
+      # Add overall title
       combined_plot <- ggpubr::annotate_figure(combined_plot,
-                                               top = ggpubr::text_grob(plot_title, size = 14, face = "bold"),
-                                               bottom = ggpubr::text_grob("Time (s)", size = 12))
+                                               top = ggpubr::text_grob(plot_title, size = 14, face = "bold"))
       
       return(combined_plot)
     }
