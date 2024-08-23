@@ -203,7 +203,7 @@ ElectrodeBursts <- R6Class(
     #' @return A ggpubr object representing the combined raster plots.
     #' 
     create_comparison_raster_plot = function(control_group, treatments_array, plot_title) {
-      create_raster = function(wells, treatment, x_lim) {
+      create_raster = function(well, treatment, x_lim) {
         plot_data <- self$data %>%
           dplyr::mutate(
             Well = sub("_.*", "", Electrode),
@@ -212,20 +212,19 @@ ElectrodeBursts <- R6Class(
             `Size (spikes)` = as.numeric(`Size (spikes)`),
             `Duration (s)` = as.numeric(`Duration (s)`)
           ) %>%
-          dplyr::filter(Well %in% wells)
+          dplyr::filter(Well == well)
         
         if (nrow(plot_data) == 0) {
-          warning(paste("No data found for treatment:", treatment))
+          warning(paste("No data found for well:", well))
           return(NULL)
         }
         
         ggplot2::ggplot(plot_data, ggplot2::aes(x = `Time (s)`, y = Electrode)) +
           ggplot2::geom_tile(ggplot2::aes(width = `Duration (s)`, height = 0.8, fill = `Size (spikes)`)) +
-          ggplot2::facet_grid(Well ~ ., scales = "free_y", space = "free_y") +
           ggplot2::scale_fill_gradient(low = "red", high = "black") +
           ggplot2::scale_y_discrete(limits = rev(unique(plot_data$Electrode))) +
           ggplot2::scale_x_continuous(limits = x_lim) +
-          ggplot2::labs(title = treatment, x = NULL, y = "Electrode", fill = "Spike Size") +
+          ggplot2::labs(title = paste(treatment, "-", well), x = NULL, y = "Electrode", fill = "Spike Size") +
           ggplot2::theme_minimal() +
           ggplot2::theme(
             axis.text.y = ggplot2::element_text(size = 6),
@@ -288,11 +287,14 @@ ElectrodeBursts <- R6Class(
       x_max <- max(sapply(all_data, function(df) max(df$`Time (s)`, na.rm = TRUE)))
       x_lim <- c(x_min, x_max)
       
-      # Create individual plots for each treatment
-      plot_list <- mapply(function(treatment, data) {
+      # Create individual plots for each well of each treatment
+      plot_list <- lapply(valid_treatments, function(treatment) {
         wells <- names(treatment_row)[treatment_row == treatment]
-        create_raster(wells, treatment, x_lim)
-      }, valid_treatments, all_data, SIMPLIFY = FALSE)
+        lapply(wells, function(well) create_raster(well, treatment, x_lim))
+      })
+      
+      # Flatten the list of plots
+      plot_list <- unlist(plot_list, recursive = FALSE)
       
       # Remove NULL entries from plot_list
       plot_list <- plot_list[!sapply(plot_list, is.null)]
@@ -303,24 +305,23 @@ ElectrodeBursts <- R6Class(
       }
       
       # Calculate the number of rows and columns for the grid
-      n_plots <- length(plot_list)
-      n_cols <- min(n_plots, 3)  # Maximum 3 plots per row
-      n_rows <- ceiling(n_plots / n_cols)
+      n_treatments <- length(valid_treatments)
+      n_cols <- 2  # Two wells side by side
+      n_rows <- n_treatments
       
-      # Combine plots horizontally and wrap to multiple rows if needed
+      # Combine plots
       combined_plot <- ggpubr::ggarrange(
         plotlist = plot_list,
         ncol = n_cols, 
         nrow = n_rows,
         common.legend = TRUE,
-        legend = "right",
-        widths = rep(1, n_cols),
-        heights = rep(1, n_rows)
+        legend = "right"
       )
       
-      # Add overall title
+      # Add overall title and x-axis label
       combined_plot <- ggpubr::annotate_figure(combined_plot,
-                                               top = ggpubr::text_grob(plot_title, size = 14, face = "bold"))
+                                               top = ggpubr::text_grob(plot_title, size = 14, face = "bold"),
+                                               bottom = ggpubr::text_grob("Time (s)", size = 12))
       
       return(combined_plot)
     }
