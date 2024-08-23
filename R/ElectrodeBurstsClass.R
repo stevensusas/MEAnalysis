@@ -45,7 +45,7 @@ ElectrodeBursts <- R6Class(
     #' @return An object of class ElectrodeBursts.
     #' 
     initialize = function(filepath) {
-      df <- read_csv(filepath)
+      df <- readr::read_csv(filepath)
       
       # Process assignments
       start_row <- self$find_first_occurrence(df, "Well Information") + 1
@@ -117,7 +117,6 @@ ElectrodeBursts <- R6Class(
       subset_df <- df[start_row:end_row, ]
       return(subset_df)
     },
-    
     
     #' @description
     #' Get Sample Assignments
@@ -194,6 +193,49 @@ ElectrodeBursts <- R6Class(
     },
     
     #' @description
+    #' Create Raster
+    #'
+    #' This method creates a raster plot for specified wells and treatment.
+    #' @param wells The wells to be included in the plot.
+    #' @param treatment The treatment name for the plot title.
+    #' @param x_lim The x-axis limits for the plot.
+    #' @return A ggplot object representing the raster plot.
+    #' 
+    create_raster = function(wells, treatment, x_lim) {
+      plot_data <- self$data %>%
+        dplyr::mutate(
+          Well = sub("_.*", "", Electrode),
+          Electrode = sub(".*_", "", Electrode),
+          `Time (s)` = as.numeric(`Time (s)`),
+          `Size (spikes)` = as.numeric(`Size (spikes)`),
+          `Duration (s)` = as.numeric(`Duration (s)`)
+        ) %>%
+        dplyr::filter(Well %in% wells)
+      
+      if (nrow(plot_data) == 0) {
+        warning(paste("No data found for treatment:", treatment))
+        return(NULL)
+      }
+      
+      ggplot2::ggplot(plot_data, ggplot2::aes(x = `Time (s)`, y = Electrode)) +
+        ggplot2::geom_tile(ggplot2::aes(width = `Duration (s)`, height = 0.8, fill = `Size (spikes)`)) +
+        ggplot2::facet_grid(Well ~ ., scales = "free_y", space = "free_y") +
+        ggplot2::scale_fill_gradient(low = "red", high = "black") +
+        ggplot2::scale_y_discrete(limits = rev(unique(plot_data$Electrode))) +
+        ggplot2::scale_x_continuous(limits = x_lim) +
+        ggplot2::labs(title = treatment, x = NULL, y = "Electrode", fill = "Spike Size") +
+        ggplot2::theme_minimal() +
+        ggplot2::theme(
+          axis.text.y = ggplot2::element_text(size = 6),
+          strip.text = ggplot2::element_text(size = 10, face = "bold"),
+          panel.spacing = ggplot2::unit(1, "lines"),
+          panel.background = ggplot2::element_rect(fill = "white", color = NA),
+          plot.background = ggplot2::element_rect(fill = "white", color = NA),
+          plot.title = ggplot2::element_text(hjust = 0.5, size = 12, face = "bold")
+        )
+    },
+    
+    #' @description
     #' Create Comparison Raster Plot
     #'
     #' This method creates a comparison raster plot for multiple treatments
@@ -258,7 +300,7 @@ ElectrodeBursts <- R6Class(
       # Create individual plots for each treatment
       plot_list <- mapply(function(treatment, data) {
         wells <- names(treatment_row)[treatment_row == treatment]
-        create_raster(wells, treatment, x_lim)
+        self$create_raster(wells, treatment, x_lim)
       }, valid_treatments, all_data, SIMPLIFY = FALSE)
       
       # Remove NULL entries from plot_list
@@ -272,10 +314,11 @@ ElectrodeBursts <- R6Class(
       # Combine plots vertically
       combined_plot <- ggpubr::ggarrange(
         plotlist = plot_list,
-        ncol = 1, nrow = length(plot_list),
-        common.legend = TRUE, legend = "right",
+        ncol = 1, 
+        nrow = length(plot_list),
+        common.legend = TRUE, 
+        legend = "right",
         heights = rep(1, length(plot_list))
-      )
       
       # Add overall title and x-axis label
       combined_plot <- ggpubr::annotate_figure(combined_plot,
