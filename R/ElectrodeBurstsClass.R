@@ -321,8 +321,7 @@ ElectrodeBursts <- R6Class(
         heights = rep(1, length(plot_list))
       
       # Add overall title and x-axis label
-      combined_plot <- ggpubr::annotate_figure(combined_plot,
-                                               top = ggpubr::text_grob(plot_title, size = 14, face = "bold"),
+      combined_plot <- ggpubr::annotate_figure(combined_plot, top = ggpubr::text_grob(plot_title, size = 14, face = "bold"),
                                                bottom = ggpubr::text_grob("Time (s)", size = 12))
       
       return(combined_plot)
