@@ -302,10 +302,10 @@ ElectrodeBursts <- R6Class(
           legend = "none"
         )
         
-        # Add the treatment name to the right
+        # Add the treatment name to the right, with smaller font and bold
         ggpubr::annotate_figure(
           combined_plot,
-          right = ggpubr::text_grob(treatment, rot = 270, vjust = 0.5, size = 12)
+          right = ggpubr::text_grob(treatment, rot = 270, vjust = 0.5, size = 10, face = "bold")
         )
       })
       
