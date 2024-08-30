@@ -36,55 +36,10 @@ plate3_30min <- c(
   "/Users/stevensu/Desktop/Korb Lab/Steven Supplementary MEA 2/DIV 29/Plate 3/Plate 3 DIV 29 Min 30.csv"
 )
 
-MEAnalysis_modified <- MEAnalysis$new()
-
-
-MEAnalysis$set("public", "remove_f4", function() {
-  # Number of wells for NEG Control - HET
-  num_wells <- as.numeric(self$treatment_averages["Total Wells", "NEG Control-HET"])
-  
-  # Helper functions
-  recalculate_avg <- function(current_avg, f4_value, num_wells) {
-    (current_avg * num_wells - f4_value) / (num_wells - 1)
-  }
-  
-  recalculate_std <- function(current_avg, current_std, f4_value, num_wells) {
-    sum_squared_dev <- (current_std ^ 2) * num_wells
-    f4_dev_squared <- (f4_value - current_avg) ^ 2
-    new_sum_squared_dev <- sum_squared_dev - f4_dev_squared
-    sqrt(new_sum_squared_dev / (num_wells - 2))
-  }
-  
-  # Get F4 values from well_averages
-  f4_values <- self$well_averages %>%
-    filter(Well == "F4")
-  
-  # Use the predefined metrics from the class
-  for (metric in self$metrics) {
-    if (grepl("- Avg$", metric)) {
-      std_metric <- gsub("- Avg$", "- Std", metric)
-      
-      f4_value <- as.numeric(f4_values[[metric]])
-      
-      current_avg <- as.numeric(self$treatment_averages[metric, "NEG Control-HET"])
-      current_std <- as.numeric(self$treatment_averages[std_metric, "NEG Control-HET"])
-      
-      new_avg <- recalculate_avg(current_avg, f4_value, num_wells)
-      new_std <- recalculate_std(current_avg, current_std, f4_value, num_wells)
-      
-      self$treatment_averages[metric, "NEG Control-HET"] <- new_avg
-      self$treatment_averages[std_metric, "NEG Control-HET"] <- new_std
-    }
-  }
-  
-  # Optionally, you can add a message to confirm the operation
-  cat("F4 well has been removed from NEG Control-HET averages and standard deviations.\n")
-})
-
-
 plot = MEAnalysis$new("/Users/stevensu/Desktop/Korb Lab/Steven Supplementary MEA 2/DIV 29/Plate 3/Plate 3 DIV 29 Min 30.csv")
 control = 'U'
 samples = c('U', 'NEG Control-HET')
+plot$remove_well('F4', "NEG Control-HET")
 table = plot$get_treatment_averages()
 samples = plot$get_sample_assignments()
 wells = plot$get_well_averages()
