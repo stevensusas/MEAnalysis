@@ -39,8 +39,9 @@ plate3_30min <- c(
 plot = MEAnalysis$new("/Users/stevensu/Desktop/Korb Lab/Steven Supplementary MEA 2/DIV 29/Plate 3/Plate 3 DIV 29 Min 30.csv")
 control = 'U'
 samples = c('U', 'NEG Control-HET')
+table_before = plot$get_treatment_averages()
 plot$remove_well('F4', "NEG Control-HET")
-table = plot$get_treatment_averages()
+table_after = plot$get_treatment_averages()
 samples = plot$get_sample_assignments()
 wells = plot$get_well_averages()
 

@@ -501,41 +501,70 @@ MEAnalysis <- R6Class(
     remove_well = function(well, treatment) {
       num_wells <- as.numeric(self$treatment_averages["Total Wells", treatment])
       
+      if (num_wells <= 1) {
+        stop(sprintf("Cannot remove the last well from treatment %s", treatment))
+      }
+      
       # Helper functions
       recalculate_avg <- function(current_avg, well_value, num_wells) {
-        (current_avg * num_wells - well_value) / (num_wells - 1)
+        new_avg <- (current_avg * num_wells - well_value) / (num_wells - 1)
+        if (is.nan(new_avg) || is.infinite(new_avg)) return(0)
+        return(new_avg)
       }
       
       recalculate_std <- function(current_avg, current_std, well_value, num_wells) {
-        sum_squared_dev <- (current_std ^ 2) * num_wells
+        if (num_wells <= 2) return(0)  # Can't calculate std dev with less than 2 wells
+        sum_squared_dev <- (current_std ^ 2) * (num_wells - 1)  # Use n-1 for sample variance
         well_dev_squared <- (well_value - current_avg) ^ 2
         new_sum_squared_dev <- sum_squared_dev - well_dev_squared
-        sqrt(new_sum_squared_dev / (num_wells - 2))
+        if (new_sum_squared_dev < 0) new_sum_squared_dev <- 0  # Avoid negative values
+        new_std <- sqrt(new_sum_squared_dev / (num_wells - 2))
+        if (is.nan(new_std) || is.infinite(new_std)) return(0)
+        return(new_std)
       }
       
-      # Use the predefined metrics from the class
-      for (metric in self$metrics) {
-        if (grepl("- Avg$", metric)) {
-          std_metric <- gsub("- Avg$", "- Std", metric)
-          
-          # Get well value for this metric
+      # List of metrics with Avg/Std distinction
+      avg_std_metrics <- c(
+        "Burst Duration", "Number of Spikes per Burst", "Mean ISI within Burst",
+        "Median ISI within Burst", "Inter-Burst Interval", "Burst Frequency",
+        "Network Burst Duration", "Number of Spikes per Network Burst",
+        "Number of Elecs Participating in Burst"
+      )
+      
+      # Process metrics
+      for (metric in rownames(self$treatment_averages)) {
+        if (metric == "Total Wells") next  # Skip Total Wells, we'll update it later
+        
+        base_metric <- gsub(" - Avg| - Std", "", metric)
+        
+        if (base_metric %in% avg_std_metrics) {
+          # Metric with Avg/Std distinction
+          if (grepl("- Avg", metric)) {
+            avg_metric <- metric
+            std_metric <- gsub("- Avg", "- Std", metric)
+            well_value <- as.numeric(self$well_averages[avg_metric, well])
+            current_avg <- as.numeric(self$treatment_averages[avg_metric, treatment])
+            current_std <- as.numeric(self$treatment_averages[std_metric, treatment])
+            
+            new_avg <- recalculate_avg(current_avg, well_value, num_wells)
+            new_std <- recalculate_std(current_avg, current_std, well_value, num_wells)
+            
+            self$treatment_averages[avg_metric, treatment] <- new_avg
+            self$treatment_averages[std_metric, treatment] <- new_std
+          }
+        } else {
+          # Metric without Avg/Std distinction
           well_value <- as.numeric(self$well_averages[metric, well])
+          current_value <- as.numeric(self$treatment_averages[metric, treatment])
           
-          current_avg <- as.numeric(self$treatment_averages[metric, treatment])
-          current_std <- as.numeric(self$treatment_averages[std_metric, treatment])
-          
-          new_avg <- recalculate_avg(current_avg, well_value, num_wells)
-          new_std <- recalculate_std(current_avg, current_std, well_value, num_wells)
-          
-          self$treatment_averages[metric, treatment] <- new_avg
-          self$treatment_averages[std_metric, treatment] <- new_std
+          new_value <- recalculate_avg(current_value, well_value, num_wells)
+          self$treatment_averages[metric, treatment] <- new_value
         }
       }
       
       # Update the Total Wells count
       self$treatment_averages["Total Wells", treatment] <- num_wells - 1
       
-      # Optionally, you can add a message to confirm the operation
       cat(sprintf("Well %s has been removed from %s averages and standard deviations.\n", well, treatment))
     }
   )
