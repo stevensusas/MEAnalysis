@@ -41,6 +41,7 @@ It also provides methods for performing statistical analysis and creating plots.
 \item \href{#method-MEAnalysis-get_well_averages}{\code{MEAnalysis$get_well_averages()}}
 \item \href{#method-MEAnalysis-get_treatment_list}{\code{MEAnalysis$get_treatment_list()}}
 \item \href{#method-MEAnalysis-get_electrode_averages}{\code{MEAnalysis$get_electrode_averages()}}
+\item \href{#method-MEAnalysis-remove_well}{\code{MEAnalysis$remove_well()}}
 \item \href{#method-MEAnalysis-clone}{\code{MEAnalysis$clone()}}
 }
 }
@@ -308,6 +309,30 @@ This method extracts the electrode averages from the MEA data.
 }
 \subsection{Returns}{
 A data frame with electrode averages.
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-MEAnalysis-remove_well"></a>}}
+\if{latex}{\out{\hypertarget{method-MEAnalysis-remove_well}{}}}
+\subsection{Method \code{remove_well()}}{
+Remove a well
+
+This method reomves a well's data from a given treatment.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{MEAnalysis$remove_well(well, treatment)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{well}}{The well to be removed.}
+
+\item{\code{treatment}}{The treatment to remove the well from.}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+None
 }
 }
 \if{html}{\out{<hr>}}

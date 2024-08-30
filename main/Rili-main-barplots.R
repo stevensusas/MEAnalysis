@@ -1,5 +1,6 @@
 library(MEAnalysis)
 library(ggplot2)
+
 plate1_5min <- c(
   "/Users/stevensu/Desktop/Korb Lab/MEA Analysis/Steven_MEA/ra nxn and Sean 6-4-24/Plate 1/Plate 1 DIV 11 5 Min.csv",
   "/Users/stevensu/Desktop/Korb Lab/MEA Analysis/Steven_MEA/ra nxn and Sean 6-5-24/Plate 1/Plate 1 DIV 12 5 Min.csv",

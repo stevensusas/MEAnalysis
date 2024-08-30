@@ -43,6 +43,7 @@ and comparison plots across different treatments.
 <li><span class="pkg-link" data-pkg="MEAnalysis" data-topic="MEAnalysis" data-id="get_treatment_list"><a href='../../MEAnalysis/html/MEAnalysis.html#method-MEAnalysis-get_treatment_list'><code>MEAnalysis::MEAnalysis$get_treatment_list()</code></a></span></li>
 <li><span class="pkg-link" data-pkg="MEAnalysis" data-topic="MEAnalysis" data-id="get_well_averages"><a href='../../MEAnalysis/html/MEAnalysis.html#method-MEAnalysis-get_well_averages'><code>MEAnalysis::MEAnalysis$get_well_averages()</code></a></span></li>
 <li><span class="pkg-link" data-pkg="MEAnalysis" data-topic="MEAnalysis" data-id="perform_t_tests"><a href='../../MEAnalysis/html/MEAnalysis.html#method-MEAnalysis-perform_t_tests'><code>MEAnalysis::MEAnalysis$perform_t_tests()</code></a></span></li>
+<li><span class="pkg-link" data-pkg="MEAnalysis" data-topic="MEAnalysis" data-id="remove_well"><a href='../../MEAnalysis/html/MEAnalysis.html#method-MEAnalysis-remove_well'><code>MEAnalysis::MEAnalysis$remove_well()</code></a></span></li>
 <li><span class="pkg-link" data-pkg="MEAnalysis" data-topic="MEAnalysis" data-id="treatment_averages_t_test_plot"><a href='../../MEAnalysis/html/MEAnalysis.html#method-MEAnalysis-treatment_averages_t_test_plot'><code>MEAnalysis::MEAnalysis$treatment_averages_t_test_plot()</code></a></span></li>
 </ul>
 </details>
