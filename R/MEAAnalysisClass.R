@@ -498,74 +498,74 @@ MEAnalysis <- R6Class(
     #' @param treatment The treatment to remove the well from.
     #' @return None
     #' @export
-    remove_well = function(well, treatment) {
-      num_wells <- as.numeric(self$treatment_averages["Total Wells", treatment])
+    remove_well <- function(well, treatment) {
+      # Assume treatment_df is the treatment dataframe
+      # Assume well_averages_df is the well averages dataframe
       
-      if (num_wells <= 1) {
-        stop(sprintf("Cannot remove the last well from treatment %s", treatment))
-      }
+      # 1. Find the column belonging to the treatment parameter in the treatment dataframe
+      treatment_col <- self$treatment_averages[[treatment]]
       
-      # Helper functions
-      recalculate_avg <- function(current_avg, well_value, num_wells) {
-        new_avg <- (current_avg * num_wells - well_value) / (num_wells - 1)
-        if (is.nan(new_avg) || is.infinite(new_avg)) return(0)
-        return(new_avg)
-      }
+      avg_elements <- grep(" - Avg", rownames(self$well_averages), value = TRUE)
+      std_elements <- grep(" - Std", rownames(self$well_averages), value = TRUE)
       
-      recalculate_std <- function(current_avg, current_std, well_value, num_wells) {
-        if (num_wells <= 2) return(0)  # Can't calculate std dev with less than 2 wells
-        sum_squared_dev <- (current_std ^ 2) * (num_wells - 1)  # Use n-1 for sample variance
-        well_dev_squared <- (well_value - current_avg) ^ 2
-        new_sum_squared_dev <- sum_squared_dev - well_dev_squared
-        if (new_sum_squared_dev < 0) new_sum_squared_dev <- 0  # Avoid negative values
-        new_std <- sqrt(new_sum_squared_dev / (num_wells - 2))
-        if (is.nan(new_std) || is.infinite(new_std)) return(0)
-        return(new_std)
-      }
+      set_B <- c(avg_elements, std_elements)
+      set_A <- setdiff(self$metrics, set_B)
       
-      # List of metrics with Avg/Std distinction
-      avg_std_metrics <- c(
-        "Burst Duration", "Number of Spikes per Burst", "Mean ISI within Burst",
-        "Median ISI within Burst", "Inter-Burst Interval", "Burst Frequency",
-        "Network Burst Duration", "Number of Spikes per Network Burst",
-        "Number of Elecs Participating in Burst"
-      )
-      
-      # Process metrics
-      for (metric in rownames(self$treatment_averages)) {
-        if (metric == "Total Wells") next  # Skip Total Wells, we'll update it later
+      for (i in seq_len(nrow(treatment_df))) {
+        row_name <- rownames(treatment_df)[i]
         
-        base_metric <- gsub(" - Avg| - Std", "", metric)
+        if (row_name == "Total Wells") {
+          next  # Skip "Total Wells"
+        }
         
-        if (base_metric %in% avg_std_metrics) {
-          # Metric with Avg/Std distinction
-          if (grepl("- Avg", metric)) {
-            avg_metric <- metric
-            std_metric <- gsub("- Avg", "- Std", metric)
-            well_value <- as.numeric(self$well_averages[avg_metric, well])
-            current_avg <- as.numeric(self$treatment_averages[avg_metric, treatment])
-            current_std <- as.numeric(self$treatment_averages[std_metric, treatment])
-            
-            new_avg <- recalculate_avg(current_avg, well_value, num_wells)
-            new_std <- recalculate_std(current_avg, current_std, well_value, num_wells)
-            
-            self$treatment_averages[avg_metric, treatment] <- new_avg
-            self$treatment_averages[std_metric, treatment] <- new_std
-          }
-        } else {
-          # Metric without Avg/Std distinction
-          well_value <- as.numeric(self$well_averages[metric, well])
-          current_value <- as.numeric(self$treatment_averages[metric, treatment])
+        if (grepl(" - Avg", row_name) && any(grepl(paste(set_A, collapse="|"), row_name))) {
+          well_col <- well_averages_df[[well]]
+          base_row_name <- gsub(" - Avg", "", row_name)
+          base_row_value <- well_averages_df[base_row_name, well]
           
-          new_value <- recalculate_avg(current_value, well_value, num_wells)
-          self$treatment_averages[metric, treatment] <- new_value
+          updated_avg <- (treatment_col[i] * treatment_df["Total Wells", treatment] - base_row_value) /
+            (treatment_df["Total Wells", treatment] - 1)
+          treatment_df[i, treatment] <- updated_avg
+          
+        } else if (grepl(" - Avg", row_name) && any(grepl(paste(set_B, collapse="|"), row_name))) {
+          well_col <- well_averages_df[[well]]
+          base_row_value <- well_averages_df[row_name, well]
+          
+          updated_avg <- (treatment_col[i] * treatment_df["Total Wells", treatment] - base_row_value) /
+            (treatment_df["Total Wells", treatment] - 1)
+          treatment_df[i, treatment] <- updated_avg
+          
+        } else if (grepl(" - Std", row_name) && any(grepl(paste(set_A, collapse="|"), row_name))) {
+          well_col <- well_averages_df[[well]]
+          base_row_name <- gsub(" - Std", "", row_name)
+          base_row_value <- well_averages_df[base_row_name, well]
+          
+          # Check if there are only two wells before removal
+          if (treatment_df["Total Wells", treatment] == 2) {
+            updated_std <- 0  # Set the standard deviation to 0
+          } else {
+            updated_std <- sqrt((treatment_col[i]^2 * (treatment_df["Total Wells", treatment] - 1) - 
+                                   base_row_value^2) / 
+                                  (treatment_df["Total Wells", treatment] - 2))
+          }
+          treatment_df[i, treatment] <- updated_std
+          
+        } else if (grepl(" - Std", row_name) && any(grepl(paste(set_B, collapse="|"), row_name))) {
+          well_col <- well_averages_df[[well]]
+          base_row_value <- well_averages_df[row_name, well]
+          
+          # Check if there are only two wells before removal
+          if (treatment_df["Total Wells", treatment] == 2) {
+            updated_std <- 0  # Set the standard deviation to 0
+          } else {
+            updated_std <- sqrt((treatment_col[i]^2 * (treatment_df["Total Wells", treatment] - 1) - 
+                                   base_row_value^2) / 
+                                  (treatment_df["Total Wells", treatment] - 2))
+          }
+          treatment_df[i, treatment] <- updated_std
         }
       }
-      
-      # Update the Total Wells count
-      self$treatment_averages["Total Wells", treatment] <- num_wells - 1
-      
-      cat(sprintf("Well %s has been removed from %s averages and standard deviations.\n", well, treatment))
     }
+    
   )
 )
