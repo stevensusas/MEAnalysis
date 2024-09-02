@@ -504,10 +504,7 @@ MEAnalysis <- R6Class(
       
       # 1. Find the column belonging to the treatment parameter in the treatment dataframe
       treatment_col <- self$treatment_averages[[treatment]]
-      
-      # Debugging: Print the data type and values
-      print(paste("treatment_col[i]:", treatment_col[i]))
-      print(paste("self$treatment_averages['Total Wells', treatment]:", self$treatment_averages["Total Wells", treatment]))
+    
       
       avg_elements <- grep(" - Avg", rownames(self$well_averages), value = TRUE)
       std_elements <- grep(" - Std", rownames(self$well_averages), value = TRUE)
@@ -526,7 +523,9 @@ MEAnalysis <- R6Class(
           well_col <- self$well_averages[[well]]
           base_row_name <- gsub(" - Avg", "", row_name)
           base_row_value <- self$well_averages[base_row_name, well]
-          
+          # Debugging: Print the data type and values
+          print(paste("treatment_col[i]:", treatment_col[i]))
+          print(paste("self$treatment_averages['Total Wells', treatment]:", self$treatment_averages["Total Wells", treatment]))
           updated_avg <- (treatment_col[i] * self$treatment_averages["Total Wells", treatment] - base_row_value) /
             (treatment_df["Total Wells", treatment] - 1)
           self$treatment_averages[i, treatment] <- updated_avg
