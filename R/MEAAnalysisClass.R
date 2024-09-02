@@ -520,7 +520,6 @@ MEAnalysis <- R6Class(
           base_row_name <- gsub(" - Avg", "", row_name)
           base_row_value <- as.numeric(self$well_averages[base_row_name, well])
           
-          # Ensure numeric conversion and avoid any non-numeric issue
           total_wells <- as.numeric(self$treatment_averages["Total Wells", treatment])
           if (!is.na(total_wells) && total_wells > 1) {
             updated_avg <- (treatment_col[i] * total_wells - base_row_value) / (total_wells - 1)
@@ -563,6 +562,10 @@ MEAnalysis <- R6Class(
           self$treatment_averages[i, treatment] <- updated_std
         }
       }
+      
+      # Update the "Total Wells" value after processing all the rows
+      self$treatment_averages["Total Wells", treatment] <- as.numeric(self$treatment_averages["Total Wells", treatment]) - 1
+      
       return(NULL)
     }
     
