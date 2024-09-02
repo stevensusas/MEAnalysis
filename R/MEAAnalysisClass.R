@@ -498,7 +498,7 @@ MEAnalysis <- R6Class(
     #' @param treatment The treatment to remove the well from.
     #' @return None
     #' @export
-    remove_well <- function(well, treatment) {
+    remove_well = function(well, treatment) {
       # Assume treatment_df is the treatment dataframe
       # Assume well_averages_df is the well averages dataframe
       
@@ -511,61 +511,61 @@ MEAnalysis <- R6Class(
       set_B <- c(avg_elements, std_elements)
       set_A <- setdiff(self$metrics, set_B)
       
-      for (i in seq_len(nrow(treatment_df))) {
-        row_name <- rownames(treatment_df)[i]
+      for (i in seq_len(nrow(self$treatment_averages))) {
+        row_name <- rownames(self$treatment_averages)[i]
         
         if (row_name == "Total Wells") {
           next  # Skip "Total Wells"
         }
         
         if (grepl(" - Avg", row_name) && any(grepl(paste(set_A, collapse="|"), row_name))) {
-          well_col <- well_averages_df[[well]]
+          well_col <- self$well_averages[[well]]
           base_row_name <- gsub(" - Avg", "", row_name)
-          base_row_value <- well_averages_df[base_row_name, well]
+          base_row_value <- self$well_averages[base_row_name, well]
           
-          updated_avg <- (treatment_col[i] * treatment_df["Total Wells", treatment] - base_row_value) /
+          updated_avg <- (treatment_col[i] * self$treatment_averages["Total Wells", treatment] - base_row_value) /
             (treatment_df["Total Wells", treatment] - 1)
-          treatment_df[i, treatment] <- updated_avg
+          self$treatment_averages[i, treatment] <- updated_avg
           
         } else if (grepl(" - Avg", row_name) && any(grepl(paste(set_B, collapse="|"), row_name))) {
-          well_col <- well_averages_df[[well]]
-          base_row_value <- well_averages_df[row_name, well]
+          well_col <- self$well_averages[[well]]
+          base_row_value <- self$well_averages[row_name, well]
           
-          updated_avg <- (treatment_col[i] * treatment_df["Total Wells", treatment] - base_row_value) /
-            (treatment_df["Total Wells", treatment] - 1)
-          treatment_df[i, treatment] <- updated_avg
+          updated_avg <- (treatment_col[i] * self$treatment_averages["Total Wells", treatment] - base_row_value) /
+            (self$treatment_averages["Total Wells", treatment] - 1)
+          self$treatment_averages[i, treatment] <- updated_avg
           
         } else if (grepl(" - Std", row_name) && any(grepl(paste(set_A, collapse="|"), row_name))) {
-          well_col <- well_averages_df[[well]]
+          well_col <- self$well_averages[[well]]
           base_row_name <- gsub(" - Std", "", row_name)
-          base_row_value <- well_averages_df[base_row_name, well]
+          base_row_value <- self$well_averages[base_row_name, well]
           
           # Check if there are only two wells before removal
-          if (treatment_df["Total Wells", treatment] == 2) {
+          if (self$treatment_averages["Total Wells", treatment] == 2) {
             updated_std <- 0  # Set the standard deviation to 0
           } else {
-            updated_std <- sqrt((treatment_col[i]^2 * (treatment_df["Total Wells", treatment] - 1) - 
+            updated_std <- sqrt((treatment_col[i]^2 * (self$treatment_averages["Total Wells", treatment] - 1) - 
                                    base_row_value^2) / 
-                                  (treatment_df["Total Wells", treatment] - 2))
+                                  (self$treatment_averages["Total Wells", treatment] - 2))
           }
-          treatment_df[i, treatment] <- updated_std
+          self$treatment_averages[i, treatment] <- updated_std
           
         } else if (grepl(" - Std", row_name) && any(grepl(paste(set_B, collapse="|"), row_name))) {
-          well_col <- well_averages_df[[well]]
-          base_row_value <- well_averages_df[row_name, well]
+          well_col <- self$well_averages[[well]]
+          base_row_value <- self$well_averages[row_name, well]
           
           # Check if there are only two wells before removal
-          if (treatment_df["Total Wells", treatment] == 2) {
+          if (self$treatment_averages["Total Wells", treatment] == 2) {
             updated_std <- 0  # Set the standard deviation to 0
           } else {
-            updated_std <- sqrt((treatment_col[i]^2 * (treatment_df["Total Wells", treatment] - 1) - 
+            updated_std <- sqrt((treatment_col[i]^2 * (self$treatment_averages["Total Wells", treatment] - 1) - 
                                    base_row_value^2) / 
-                                  (treatment_df["Total Wells", treatment] - 2))
+                                  (self$treatment_averages["Total Wells", treatment] - 2))
           }
-          treatment_df[i, treatment] <- updated_std
+          self$treatment_averages[i, treatment] <- updated_std
         }
       }
+      return(NULL)
     }
-    
   )
 )
