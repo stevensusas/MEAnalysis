@@ -498,7 +498,7 @@ MEAnalysis <- R6Class(
     #' @param treatment The treatment to remove the well from.
     #' @return None
     #' @export
-    remove_well <- function(well, treatment) {
+    remove_well = function(well, treatment) {
       # 1. Find the column belonging to the treatment parameter in the treatment dataframe
       treatment_col <- as.numeric(self$treatment_averages[[treatment]])
       
