@@ -521,9 +521,7 @@ MEAnalysis <- R6Class(
           base_row_value <- as.numeric(self$well_averages[base_row_name, well])
           
           total_wells <- as.numeric(self$treatment_averages["Total Wells", treatment])
-          if (treatment = 'Mean Firing Rate (Hz)') {
-            print(total_wells)
-          }
+          
           if (!is.na(total_wells) && total_wells > 1) {
             updated_avg <- (treatment_col[i] * total_wells - base_row_value) / (total_wells - 1)
             self$treatment_averages[i, treatment] <- updated_avg
