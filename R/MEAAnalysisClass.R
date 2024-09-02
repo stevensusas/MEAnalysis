@@ -508,6 +508,9 @@ MEAnalysis <- R6Class(
       set_B <- c(avg_elements, std_elements)
       set_A <- setdiff(self$metrics, set_B)
       
+      print(set_A)
+      print(set_B)
+      
       for (i in seq_len(nrow(self$treatment_averages))) {
         row_name <- rownames(self$treatment_averages)[i]
         
@@ -521,7 +524,6 @@ MEAnalysis <- R6Class(
           base_row_value <- as.numeric(self$well_averages[base_row_name, well])
           
           total_wells <- as.numeric(self$treatment_averages["Total Wells", treatment])
-          
           if (!is.na(total_wells) && total_wells > 1) {
             updated_avg <- (treatment_col[i] * total_wells - base_row_value) / (total_wells - 1)
             self$treatment_averages[i, treatment] <- updated_avg
@@ -566,8 +568,6 @@ MEAnalysis <- R6Class(
       
       # Update the "Total Wells" value after processing all the rows
       self$treatment_averages["Total Wells", treatment] <- as.numeric(self$treatment_averages["Total Wells", treatment]) - 1
-      
-      return(NULL)
     }
     
   )
