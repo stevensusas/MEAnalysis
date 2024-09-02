@@ -526,7 +526,8 @@ MEAnalysis <- R6Class(
           # Debugging: Print the data type and values
           print(paste("treatment_col[i]:", treatment_col[i]))
           print(paste("self$treatment_averages['Total Wells', treatment]:", self$treatment_averages["Total Wells", treatment]))
-          updated_avg <- (treatment_col[i] * self$treatment_averages["Total Wells", treatment] - base_row_value) /
+          updated_avg <- (treatment_col[i] * as.numeric(self$treatment_averages["Total Wells", treatment])
+ - base_row_value) /
             (treatment_df["Total Wells", treatment] - 1)
           self$treatment_averages[i, treatment] <- updated_avg
           
