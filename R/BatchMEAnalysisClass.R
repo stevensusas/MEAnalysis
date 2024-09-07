@@ -121,6 +121,47 @@ BatchMEAnalysis <- R6Class(
     },
     
     #' @description
+    #' Get Treatment Averages
+    #'
+    #' This method extracts the treatment averages from the MEA data.
+    #' @param df The data frame containing the raw MEA data.
+    #' @return A data frame with treatment averages.
+    #' @export
+    get_treatment_averages = function(df) {
+      if (!is.null(self$treatment_averages)) {
+        return(self$treatment_averages)
+      } else {
+        start_row <- self$find_first_occurrence(df, "Treatment Averages")
+        end_row <- self$find_first_occurrence(df, "Well Averages") - 1
+        
+        df_treatment_averages <- self$subset_by_range(df, start_row, end_row)
+        
+        new_df_treatment_averages <- df_treatment_averages %>%
+          separate(
+            `Investigator:`,
+            into = paste0("V", 1:max(lengths(
+              strsplit(df_treatment_averages$`Investigator:`, ",")
+            ))),
+            sep = ",",
+            fill = "right"
+          )
+        
+        new_df_treatment_averages <- new_df_treatment_averages %>%
+          select_if(~ all(!is.na(.)))
+        
+        new_df_treatment_averages <- as.data.frame(new_df_treatment_averages)
+        
+        rownames(new_df_treatment_averages) <- new_df_treatment_averages[, 1]
+        new_df_treatment_averages <- new_df_treatment_averages[, -1]
+        colnames(new_df_treatment_averages) <- new_df_treatment_averages[1, ]
+        new_df_treatment_averages <- new_df_treatment_averages[-1, ]
+        new_df_treatment_averages <- new_df_treatment_averages[, colnames(new_df_treatment_averages) != ""]
+        
+        return(new_df_treatment_averages)
+      }
+    },
+    
+    #' @description
     #' Generate Time Comparison Plots
     #'
     #' This method generates plots comparing metrics across different conditions over time.
@@ -131,7 +172,8 @@ BatchMEAnalysis <- R6Class(
     #' @param title Optional. The title of the plot.
     #' @return A ggplot object.
     #' 
-  
+    
+    
     time_comparison_plots = function(data_list, conditions, metric, control_condition = NULL, title = NULL) {  # Function to plot time comparison for multiple conditions
       combined_df <- bind_rows(data_list)
       filtered_df <- combined_df %>% filter(Sample %in% conditions)
