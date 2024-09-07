@@ -390,6 +390,7 @@ MEAnalysis <- R6Class(
         new_df_treatment_averages <- new_df_treatment_averages[, -1]
         colnames(new_df_treatment_averages) <- new_df_treatment_averages[1, ]
         new_df_treatment_averages <- new_df_treatment_averages[-1, ]
+        new_df_treatment_averages <- new_df_treatment_averages[, colnames(new_df_treatment_averages) != ""]
         
         return(new_df_treatment_averages)
       }
