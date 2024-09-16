@@ -23,22 +23,22 @@ MEAnalysis <- R6Class(
   public = list(
     #' @field raw_df A data frame containing the raw MEA data.
     raw_df = NULL,
-    
+
     #' @field sample_assignments A data frame containing the sample assignments.
     sample_assignments = NULL,
-    
+
     #' @field treatment_averages A data frame containing the treatment averages.
     treatment_averages = NULL,
-    
+
     #' @field well_averages A data frame containing the well averages.
     well_averages = NULL,
-    
+
     #' @field treatment_list A list of unique treatment names.
     treatment_list = NULL,
-    
+
     #' @field electrode_averages A data frame containing the electrode averages.
     electrode_averages = NULL,
-    
+
     #' @field metrics A character vector of metrics to be analyzed.
     metrics = c(
       "Number of Spikes - Avg",
@@ -88,7 +88,7 @@ MEAnalysis <- R6Class(
       "Weighted Mean Resistance - Avg (kΩ)",
       "Weighted Mean Resistance - Std (kΩ)"
     ),
-    
+
     #' @description
     #' Initialize an MEAnalysis Object
     #'
@@ -106,7 +106,7 @@ MEAnalysis <- R6Class(
       self$well_averages <- self$get_well_averages(self$raw_df)
       self$electrode_averages <- self$get_electrode_averages(self$raw_df)
     },
-    
+
     #' @description
     #' Find First Occurrence
     #'
@@ -124,7 +124,7 @@ MEAnalysis <- R6Class(
         return(NA)
       }
     },
-    
+
     #' @description
     #' Subset by Range
     #'
@@ -141,7 +141,7 @@ MEAnalysis <- R6Class(
       subset_df <- df[start_row:end_row, ]
       return(subset_df)
     },
-    
+
     #' @description
     #' Perform T-Tests
     #'
@@ -159,7 +159,7 @@ MEAnalysis <- R6Class(
         Treatment_Mean = numeric(),
         stringsAsFactors = FALSE
       )
-      
+
       all_groups <- names(df)
       treatment_groups <- all_groups[all_groups != control_group]
       for (i in seq(1, length(self$metrics), 2)) {
@@ -168,26 +168,26 @@ MEAnalysis <- R6Class(
           control_mean <- as.numeric(df[self$metrics[i], control_group])
           control_sd <- as.numeric(df[self$metrics[i + 1], control_group])
           control_n <- as.integer(df["Total Wells", control_group])
-          
+
           for (treatment in treatment_groups) {
             treatment_mean <- as.numeric(df[self$metrics[i], treatment])
             treatment_sd <- as.numeric(df[self$metrics[i + 1], treatment])
             treatment_n <- as.integer(df["Total Wells", treatment])
-            
+
             # Calculate standard error
             control_se <- control_sd / sqrt(control_n)
             treatment_se <- treatment_sd / sqrt(treatment_n)
-            
+
             # Perform Welch's t-test
             t_stat <- (treatment_mean - control_mean) / sqrt(control_se^2 + treatment_se^2)
-            
+
             # Calculate degrees of freedom using Welch–Satterthwaite equation
             df_ttest <- (control_se^2 + treatment_se^2)^2 /
               ((control_se^2)^2 / (control_n - 1) + (treatment_se^2)^2 / (treatment_n - 1))
-            
+
             # Calculate p-value
             p_value <- 2 * pt(-abs(t_stat), df = df_ttest)
-            
+
             # Store the result
             results <- rbind(
               results,
@@ -203,10 +203,10 @@ MEAnalysis <- R6Class(
           }
         }
       }
-      
+
       return(results)
     },
-    
+
     #' @description
     #' Create Combined T-Test Plot
     #'
@@ -219,7 +219,7 @@ MEAnalysis <- R6Class(
     #' @export
     create_combined_t_test_plot = function(df, control, groups_to_plot, title) {
       if (is.null(title)) {
-        title = ""
+        title <- ""
       }
       t_test_results <- self$perform_t_tests(df, control)
       combined_data <- data.frame()
@@ -228,12 +228,12 @@ MEAnalysis <- R6Class(
           metric_avg <- as.numeric(df[self$metrics[i], ])
           metric_std <- as.numeric(df[self$metrics[i + 1], ])
           metric_n <- as.numeric(df["Total Wells", ])
-          
+
           # Calculate Standard Error (SE)
           metric_se <- metric_std / sqrt(metric_n)
-          
+
           metric_name <- gsub(" - Avg| - Std", "", self$metrics[i])
-          
+
           plot_data <- data.frame(
             Sample = names(df),
             Avg = metric_avg,
@@ -243,7 +243,7 @@ MEAnalysis <- R6Class(
           combined_data <- rbind(combined_data, plot_data)
         }
       }
-      
+
       # Merge with t-test results
       combined_data <- merge(
         combined_data,
@@ -252,11 +252,11 @@ MEAnalysis <- R6Class(
         by.y = c("Treatment", "Metric"),
         all.x = TRUE
       )
-      
+
       combined_data$Sample <- factor(combined_data$Sample, levels = c(control, setdiff(unique(combined_data$Sample), control)))
-      
+
       combined_data <- combined_data %>% filter(Sample %in% c(control, groups_to_plot))
-      
+
       p <- ggplot(combined_data, aes(x = Sample, y = Avg, fill = Sample)) +
         geom_bar(
           stat = "identity",
@@ -300,14 +300,14 @@ MEAnalysis <- R6Class(
           panel.border = element_blank(),
           axis.line = element_line(size = 1)
         ) +
-        facet_wrap(~ Metric, ncol = 6, nrow = 4, scales = "free_y")
-      
+        facet_wrap(~Metric, ncol = 6, nrow = 4, scales = "free_y")
+
       return(p)
     },
-    
+
     #' @description
     #' Treatment Averages T-Test Plot
-    #' 
+    #'
     #' This method generates a t-test plot for treatment averages.
     #' @param control The control group name.
     #' @param groups_to_plot A vector of group names to include in the plot.
@@ -318,7 +318,7 @@ MEAnalysis <- R6Class(
       df <- self$treatment_averages
       return(self$create_combined_t_test_plot(df, control, groups_to_plot, title))
     },
-    
+
     #' @description
     #' Get Sample Assignments
     #'
@@ -333,7 +333,7 @@ MEAnalysis <- R6Class(
         start_row <- self$find_first_occurrence(df, "Well Information") + 1
         end_row <- self$find_first_occurrence(df, "Additional Information")
         df_sample_assignments <- self$subset_by_range(df, start_row, end_row)
-        
+
         new_df_sample_assignments <- df_sample_assignments %>%
           separate(
             `Investigator:`,
@@ -343,18 +343,18 @@ MEAnalysis <- R6Class(
             sep = ",",
             fill = "right"
           )
-        
+
         new_df_sample_assignments <- as.data.frame(new_df_sample_assignments)
-        
+
         rownames(new_df_sample_assignments) <- new_df_sample_assignments[, 1]
         new_df_sample_assignments <- new_df_sample_assignments[, -1]
         colnames(new_df_sample_assignments) <- new_df_sample_assignments[1, ]
         new_df_sample_assignments <- new_df_sample_assignments[-1, ]
-        
+
         return(new_df_sample_assignments)
       }
     },
-    
+
     #' @description
     #' Get Treatment Averages
     #'
@@ -368,9 +368,9 @@ MEAnalysis <- R6Class(
       } else {
         start_row <- self$find_first_occurrence(df, "Treatment Averages")
         end_row <- self$find_first_occurrence(df, "Well Averages") - 1
-        
+
         df_treatment_averages <- self$subset_by_range(df, start_row, end_row)
-        
+
         new_df_treatment_averages <- df_treatment_averages %>%
           separate(
             `Investigator:`,
@@ -380,22 +380,22 @@ MEAnalysis <- R6Class(
             sep = ",",
             fill = "right"
           )
-        
+
         new_df_treatment_averages <- new_df_treatment_averages %>%
           select_if(~ all(!is.na(.)))
-        
+
         new_df_treatment_averages <- as.data.frame(new_df_treatment_averages)
-        
+
         rownames(new_df_treatment_averages) <- new_df_treatment_averages[, 1]
         new_df_treatment_averages <- new_df_treatment_averages[, -1]
         colnames(new_df_treatment_averages) <- new_df_treatment_averages[1, ]
         new_df_treatment_averages <- new_df_treatment_averages[-1, ]
         new_df_treatment_averages <- new_df_treatment_averages[, colnames(new_df_treatment_averages) != ""]
-        
+
         return(new_df_treatment_averages)
       }
     },
-    
+
     #' @description
     #' Get Well Averages
     #'
@@ -409,9 +409,9 @@ MEAnalysis <- R6Class(
       } else {
         start_row <- self$find_first_occurrence(df, "Well Averages")
         end_row <- self$find_first_occurrence(df, "Measurement") - 1
-        
+
         df_well_averages <- self$subset_by_range(df, start_row, end_row)
-        
+
         new_df_well_averages <- df_well_averages %>%
           separate(
             `Investigator:`,
@@ -421,18 +421,18 @@ MEAnalysis <- R6Class(
             sep = ",",
             fill = "right"
           )
-        
+
         new_df_well_averages <- as.data.frame(new_df_well_averages)
-        
+
         rownames(new_df_well_averages) <- new_df_well_averages[, 1]
         new_df_well_averages <- new_df_well_averages[, -1]
         colnames(new_df_well_averages) <- new_df_well_averages[1, ]
         new_df_well_averages <- new_df_well_averages[-1, ]
-        
+
         return(new_df_well_averages)
       }
     },
-    
+
     #' @description
     #' Get Treatment List
     #'
@@ -444,8 +444,8 @@ MEAnalysis <- R6Class(
       if (!is.null(self$treatment_list)) {
         return(self$treatment_list)
       } else {
-        df_samples = self$get_sample_assignments(df)
-        treatment_row <- df_samples['Treatment', ]
+        df_samples <- self$get_sample_assignments(df)
+        treatment_row <- df_samples["Treatment", ]
         specific_row_array <- as.vector(unlist(treatment_row))
         treatment_array <- unique(na.omit(specific_row_array))
         treatment_array <- treatment_array[treatment_array != ""]
@@ -453,7 +453,7 @@ MEAnalysis <- R6Class(
         return(treatment_array)
       }
     },
-    
+
     #' @description
     #' Get Electrode Averages
     #'
@@ -467,9 +467,9 @@ MEAnalysis <- R6Class(
       } else {
         start_row <- self$find_first_occurrence(df, "Measurement")
         end_row <- nrow(df)
-        
+
         df_electrode_averages <- self$subset_by_range(df, start_row, end_row)
-        
+
         new_df_electrode_averages <- df_electrode_averages %>%
           separate(
             `Investigator:`,
@@ -479,97 +479,36 @@ MEAnalysis <- R6Class(
             sep = ",",
             fill = "right"
           )
-        
+
         new_df_electrode_averages <- as.data.frame(new_df_electrode_averages)
-        
+
         rownames(new_df_electrode_averages) <- new_df_electrode_averages[, 1]
         new_df_electrode_averages <- new_df_electrode_averages[, -1]
         colnames(new_df_electrode_averages) <- new_df_electrode_averages[1, ]
         new_df_electrode_averages <- new_df_electrode_averages[-1, ]
-        
+
         return(new_df_electrode_averages)
       }
     },
-    
+
     #' @description
-    #' Remove a well
+    #' Rename Treatment
     #'
-    #' This method reomves a well's data from a given treatment.
-    #' @param well The well to be removed.
-    #' @param treatment The treatment to remove the well from.
-    #' @return None
+    #' This method renames a treatment in the treatment_averages dataframe.
+    #' @param original_name The original name of the treatment.
+    #' @param new_name The new name for the treatment.
+    #' @return TRUE if the rename was successful, FALSE otherwise.
     #' @export
-    remove_well = function(well, treatment) {
-      # 1. Find the column belonging to the treatment parameter in the treatment dataframe
-      treatment_col <- as.numeric(self$treatment_averages[[treatment]])
-      
-      avg_elements <- grep(" - Avg", rownames(self$well_averages), value = TRUE)
-      std_elements <- grep(" - Std", rownames(self$well_averages), value = TRUE)
-      
-      set_B <- c(avg_elements, std_elements)
-      set_A <- setdiff(self$metrics, set_B)
-      
-      print(set_A)
-      print(set_B)
-      
-      for (i in seq_len(nrow(self$treatment_averages))) {
-        row_name <- rownames(self$treatment_averages)[i]
-        
-        if (row_name == "Total Wells") {
-          next  # Skip "Total Wells"
-        }
-        
-        if (grepl(" - Avg", row_name) && any(grepl(paste(set_A, collapse = "|"), row_name))) {
-          well_col <- as.numeric(self$well_averages[[well]])
-          base_row_name <- gsub(" - Avg", "", row_name)
-          base_row_value <- as.numeric(self$well_averages[base_row_name, well])
-          
-          total_wells <- as.numeric(self$treatment_averages["Total Wells", treatment])
-          if (!is.na(total_wells) && total_wells > 1) {
-            updated_avg <- (treatment_col[i] * total_wells - base_row_value) / (total_wells - 1)
-            self$treatment_averages[i, treatment] <- updated_avg
-          }
-          
-        } else if (grepl(" - Avg", row_name) && any(grepl(paste(set_B, collapse = "|"), row_name))) {
-          well_col <- as.numeric(self$well_averages[[well]])
-          base_row_value <- as.numeric(self$well_averages[row_name, well])
-          
-          total_wells <- as.numeric(self$treatment_averages["Total Wells", treatment])
-          if (!is.na(total_wells) && total_wells > 1) {
-            updated_avg <- (treatment_col[i] * total_wells - base_row_value) / (total_wells - 1)
-            self$treatment_averages[i, treatment] <- updated_avg
-          }
-          
-        } else if (grepl(" - Std", row_name) && any(grepl(paste(set_A, collapse = "|"), row_name))) {
-          well_col <- as.numeric(self$well_averages[[well]])
-          base_row_name <- gsub(" - Std", "", row_name)
-          base_row_value <- as.numeric(self$well_averages[base_row_name, well])
-          
-          total_wells <- as.numeric(self$treatment_averages["Total Wells", treatment])
-          if (total_wells == 2) {
-            updated_std <- 0  # Set the standard deviation to 0
-          } else if (!is.na(total_wells) && total_wells > 2) {
-            updated_std <- sqrt((treatment_col[i]^2 * (total_wells - 1) - base_row_value^2) / (total_wells - 2))
-          }
-          self$treatment_averages[i, treatment] <- updated_std
-          
-        } else if (grepl(" - Std", row_name) && any(grepl(paste(set_B, collapse = "|"), row_name))) {
-          well_col <- as.numeric(self$well_averages[[well]])
-          base_row_value <- as.numeric(self$well_averages[row_name, well])
-          
-          total_wells <- as.numeric(self$treatment_averages["Total Wells", treatment])
-          if (total_wells == 2) {
-            updated_std <- 0  # Set the standard deviation to 0
-          } else if (!is.na(total_wells) && total_wells > 2) {
-            updated_std <- sqrt((treatment_col[i]^2 * (total_wells - 1) - base_row_value^2) / (total_wells - 2))
-          }
-          self$treatment_averages[i, treatment] <- updated_std
-        }
+    rename_treatment = function(original_name, new_name) {
+      if (original_name %in% colnames(self$treatment_averages)) {
+        colnames(self$treatment_averages)[colnames(self$treatment_averages) == original_name] <- new_name
+        # Update treatment_list as well
+        self$treatment_list[self$treatment_list == original_name] <- new_name
+        return(TRUE)
+      } else {
+        warning(paste("Original treatment name", original_name, "not found in treatment_averages."))
+        return(FALSE)
       }
-      
-      # Update the "Total Wells" value after processing all the rows
-      self$treatment_averages["Total Wells", treatment] <- as.numeric(self$treatment_averages["Total Wells", treatment]) - 1
     }
-    
   )
 )

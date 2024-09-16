@@ -27,15 +27,15 @@ library(roxygen2)
 #' @export
 ElectrodeBursts <- R6Class(
   "ElectrodeBursts",
-  inherit = MEAnalysis,  # Inherit from MEAnalysis
-  
+  inherit = MEAnalysis, # Inherit from MEAnalysis
+
   public = list(
     #' @field data A data frame containing the processed MEA data.
     data = NULL,
-    
+
     #' @field assignments A data frame containing the sample assignments.
     assignments = NULL,
-    
+
     #' @description
     #' Initialize an ElectrodeBursts Object
     #'
@@ -43,46 +43,46 @@ ElectrodeBursts <- R6Class(
     #' It reads and processes the MEA data and assignments from the file.
     #' @param filepath The path to the file to be processed.
     #' @return An object of class ElectrodeBursts.
-    #' 
+    #'
     initialize = function(filepath) {
       df <- readr::read_csv(filepath)
-      
+
       # Process assignments
       start_row <- self$find_first_occurrence(df, "Well Information") + 1
       end_row <- self$find_first_occurrence(df, "Concentration")
       assignments <- self$subset_by_range(df, start_row, end_row)
       last_column_name <- names(assignments)[ncol(assignments)]
-      
+
       # Split the last column into multiple columns
       split_columns <- strsplit(assignments[[last_column_name]], ",")
       max_length <- max(sapply(split_columns, length))
       split_df <- as.data.frame(do.call(rbind, lapply(split_columns, `length<-`, max_length)))
-      
+
       # Generate new column names
       new_col_names <- paste0(last_column_name, "_", seq_len(max_length))
       colnames(split_df) <- new_col_names
-      
+
       # Remove the original last column and add the new split columns
       assignments <- assignments[, -ncol(assignments)]
       assignments <- cbind(assignments, split_df)
-      colnames(assignments) <- c(colnames(assignments)[1:(ncol(assignments)-max_length)], new_col_names)
-      
+      colnames(assignments) <- c(colnames(assignments)[1:(ncol(assignments) - max_length)], new_col_names)
+
       # Set the first row as column names and remove it from the data
       colnames(assignments) <- assignments[1, ]
       assignments <- assignments[-1, ]
-      
+
       # Reset row names
       rownames(assignments) <- NULL
-      
+
       self$assignments <- assignments
-      
+
       start_row <- 1
       end_row <- self$find_first_occurrence(df, "Well Information") - 1
       data <- self$subset_by_range(df, start_row, end_row)
       data <- data[, -c(1, 2)]
       self$data <- data
     },
-    
+
     #' @description
     #' Find First Occurrence
     #'
@@ -100,7 +100,7 @@ ElectrodeBursts <- R6Class(
         return(NA)
       }
     },
-    
+
     #' @description
     #' Subset by Range
     #'
@@ -117,49 +117,49 @@ ElectrodeBursts <- R6Class(
       subset_df <- df[start_row:end_row, ]
       return(subset_df)
     },
-    
+
     #' @description
     #' Get Sample Assignments
     #'
     #' This method returns the processed sample assignments.
     #' @return A data frame with sample assignments.
-    #' 
+    #'
     get_sample_assignment = function() {
       return(self$assignments)
     },
-    
+
     #' @description
     #' Get MEA Data
     #'
     #' This method returns the processed MEA data.
     #' @return A data frame with MEA data.
-    #' 
+    #'
     get_data = function() {
       return(self$data)
     },
-    
+
     #' @description
     #' Create Raster Plot
     #'
     #' This method creates a raster plot for a specified treatment.
     #' @param treatment The treatment name to be plotted.
     #' @return A ggplot object representing the raster plot.
-    #' 
+    #'
     create_raster_plot = function(treatment) {
       if (!"Treatment" %in% self$assignments$Well) {
         stop("'Treatment' row not found in assignments data frame.")
       }
-      
+
       # Get the treatment row
       treatment_row <- self$assignments[self$assignments$Well == "Treatment", ]
-      
+
       # Find wells with the specified treatment
       treatment_wells <- names(treatment_row)[treatment_row == treatment]
-      
+
       if (length(treatment_wells) == 0) {
         stop(paste("Treatment '", treatment, "' not found in assignments data."))
       }
-      
+
       # Prepare the data
       plot_data <- self$data %>%
         dplyr::mutate(
@@ -170,11 +170,11 @@ ElectrodeBursts <- R6Class(
           `Duration (s)` = as.numeric(`Duration (s)`)
         ) %>%
         dplyr::filter(Well %in% treatment_wells)
-      
+
       if (nrow(plot_data) == 0) {
         stop("No data found for the specified treatment wells.")
       }
-      
+
       # Create the plot
       ggplot2::ggplot(plot_data, ggplot2::aes(x = `Time (s)`, y = Electrode)) +
         ggplot2::geom_tile(ggplot2::aes(width = `Duration (s)`, height = 0.8, fill = `Size (spikes)`)) +
@@ -191,7 +191,7 @@ ElectrodeBursts <- R6Class(
           plot.background = ggplot2::element_rect(fill = "white", color = NA)
         )
     },
-    
+
     #' @description
     #' Create Comparison Raster Plot
     #'
@@ -201,9 +201,9 @@ ElectrodeBursts <- R6Class(
     #' @param treatments_array An array of treatment names to compare.
     #' @param plot_title The title of the plot.
     #' @return A ggpubr object representing the combined raster plots.
-    #' 
+    #'
     create_comparison_raster_plot = function(control_group, treatments_array, plot_title) {
-      create_raster = function(well, x_lim) {
+      create_raster <- function(well, x_lim) {
         plot_data <- self$data %>%
           dplyr::mutate(
             Well = sub("_.*", "", Electrode),
@@ -213,12 +213,12 @@ ElectrodeBursts <- R6Class(
             `Duration (s)` = as.numeric(`Duration (s)`)
           ) %>%
           dplyr::filter(Well == well)
-        
+
         if (nrow(plot_data) == 0) {
           warning(paste("No data found for well:", well))
           return(NULL)
         }
-        
+
         ggplot2::ggplot(plot_data, ggplot2::aes(x = `Time (s)`, y = Electrode)) +
           ggplot2::geom_tile(ggplot2::aes(width = `Duration (s)`, height = 0.8, fill = `Size (spikes)`)) +
           ggplot2::scale_fill_gradient(low = "red", high = "black") +
@@ -236,29 +236,29 @@ ElectrodeBursts <- R6Class(
             plot.background = ggplot2::element_rect(fill = "white", color = NA)
           )
       }
-      
+
       if (!"Treatment" %in% self$assignments$Well) {
         warning("'Treatment' row not found in assignments data frame.")
         return(NULL)
       }
-      
+
       # Get the treatment row
       treatment_row <- self$assignments[self$assignments$Well == "Treatment", ]
-      
+
       # Ensure control group is included in treatments_array
       if (!(control_group %in% treatments_array)) {
         treatments_array <- c(control_group, treatments_array)
       } else {
         treatments_array <- c(control_group, setdiff(treatments_array, control_group))
       }
-      
+
       # Filter out treatments that are not present in the data
       valid_treatments <- treatments_array[treatments_array %in% unlist(treatment_row)]
       if (length(valid_treatments) == 0) {
         warning("No valid treatments found in the data.")
         return(NULL)
       }
-      
+
       # Prepare data for all valid treatments
       all_data <- lapply(valid_treatments, function(treatment) {
         wells <- names(treatment_row)[treatment_row == treatment]
@@ -273,26 +273,26 @@ ElectrodeBursts <- R6Class(
           ) %>%
           dplyr::filter(Well %in% wells)
       })
-      
+
       # Remove NULL entries from all_data
       all_data <- all_data[!sapply(all_data, is.null)]
       valid_treatments <- valid_treatments[!sapply(all_data, is.null)]
-      
+
       if (length(all_data) == 0) {
         warning("No valid data for any treatments.")
         return(NULL)
       }
-      
+
       # Calculate overall x-axis limits
       x_min <- min(sapply(all_data, function(df) min(df$`Time (s)`, na.rm = TRUE)))
       x_max <- max(sapply(all_data, function(df) max(df$`Time (s)`, na.rm = TRUE)))
       x_lim <- c(x_min, x_max)
-      
+
       # Create individual plots for each well of each treatment
       plot_list <- lapply(valid_treatments, function(treatment) {
         wells <- names(treatment_row)[treatment_row == treatment]
         well_plots <- lapply(wells, function(well) create_raster(well, x_lim))
-        
+
         # Combine the two well plots side by side
         combined_plot <- ggpubr::ggarrange(
           plotlist = well_plots,
@@ -301,14 +301,14 @@ ElectrodeBursts <- R6Class(
           common.legend = TRUE,
           legend = "none"
         )
-        
+
         # Add the treatment name to the right, with smaller font and bold
         ggpubr::annotate_figure(
           combined_plot,
           right = ggpubr::text_grob(treatment, rot = 270, vjust = 0.5, size = 10, face = "bold")
         )
       })
-      
+
       # Combine all treatment plots vertically
       final_plot <- ggpubr::ggarrange(
         plotlist = plot_list,
@@ -317,13 +317,68 @@ ElectrodeBursts <- R6Class(
         common.legend = TRUE,
         legend = "right"
       )
-      
+
       # Add overall title and x-axis label
       final_plot <- ggpubr::annotate_figure(final_plot,
-                                            top = ggpubr::text_grob(plot_title, size = 14, face = "bold"),
-                                            bottom = ggpubr::text_grob("Time (s)", size = 12))
-      
+        top = ggpubr::text_grob(plot_title, size = 14, face = "bold"),
+        bottom = ggpubr::text_grob("Time (s)", size = 12)
+      )
+
       return(final_plot)
+    },
+
+    #' @description
+    #' Rename Treatment Across Batch
+    #'
+    #' This method renames a treatment across all files in the batch.
+    #' @param original_name The original name of the treatment.
+    #' @param new_name The new name for the treatment.
+    #' @return A list of boolean values indicating success for each file.
+    #' @export
+    rename_treatment_batch = function(original_name, new_name) {
+      results <- lapply(self$file_paths, function(file_path) {
+        mea_analysis <- MEAnalysis$new(file_path)
+        result <- mea_analysis$rename_treatment(original_name, new_name)
+        if (result) {
+          # Update the file with the new treatment name
+          write_csv(mea_analysis$raw_df, file_path)
+        }
+        return(result)
+      })
+
+      success_count <- sum(unlist(results))
+      total_files <- length(self$file_paths)
+
+      message(sprintf("Renamed treatment in %d out of %d files.", success_count, total_files))
+
+      return(results)
+    },
+
+    #' @description
+    #' Rename Treatment Across Batch
+    #'
+    #' This method renames a treatment across all files in the batch.
+    #' @param original_name The original name of the treatment.
+    #' @param new_name The new name for the treatment.
+    #' @return A list of boolean values indicating success for each file.
+    #' @export
+    rename_treatment_batch = function(original_name, new_name) {
+      results <- lapply(self$file_paths, function(file_path) {
+        mea_analysis <- MEAnalysis$new(file_path)
+        result <- mea_analysis$rename_treatment(original_name, new_name)
+        if (result) {
+          # Update the file with the new treatment name
+          write_csv(mea_analysis$raw_df, file_path)
+        }
+        return(result)
+      })
+
+      success_count <- sum(unlist(results))
+      total_files <- length(self$file_paths)
+
+      message(sprintf("Renamed treatment in %d out of %d files.", success_count, total_files))
+
+      return(results)
     }
   )
 )

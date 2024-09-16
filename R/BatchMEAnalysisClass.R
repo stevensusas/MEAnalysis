@@ -26,12 +26,12 @@ library(roxygen2)
 #' @export
 BatchMEAnalysis <- R6Class(
   "BatchMEAnalysis",
-  inherit = MEAnalysis,  # Inherit from MEAnalysis
-  
+  inherit = MEAnalysis, # Inherit from MEAnalysis
+
   public = list(
     #' @field file_paths A character vector of file paths to be processed.
-    file_paths = NULL,  # Define a public field
-    
+    file_paths = NULL, # Define a public field
+
     #' @field metrics A character vector of metrics to be analyzed.
     metrics = c(
       "Number of Spikes - Avg",
@@ -81,19 +81,19 @@ BatchMEAnalysis <- R6Class(
       "Weighted Mean Resistance - Avg (kΩ)",
       "Weighted Mean Resistance - Std (kΩ)"
     ),
-    
+
     #' @description
     #' Initialize a BatchMEAnalysis Object
     #'
     #' This method initializes the BatchMEAnalysis class with a list of data file paths.
     #' @param data_list A character vector of file paths.
     #' @return An object of class BatchMEAnalysis.
-    #' 
-  
-    initialize = function(data_list) {  # Define the initialize method
+    #'
+
+    initialize = function(data_list) { # Define the initialize method
       self$file_paths <- data_list
     },
-    
+
     #' @description
     #' Process a Single File
     #'
@@ -101,9 +101,9 @@ BatchMEAnalysis <- R6Class(
     #' @param file_path The path to the file to be processed.
     #' @param metric The specific metric to be extracted.
     #' @return A data frame with the processed metrics.
-    #' 
-  
-    process_file = function(file_path, metric) {  # Function to process a single file
+    #'
+
+    process_file = function(file_path, metric) { # Function to process a single file
       df <- read_csv(file_path)
       treatment_averages <- self$get_treatment_averages(df)
       avg_col <- paste0(metric, " - Avg")
@@ -119,7 +119,7 @@ BatchMEAnalysis <- R6Class(
         NULL
       }
     },
-    
+
     #' @description
     #' Get Treatment Averages
     #'
@@ -133,9 +133,9 @@ BatchMEAnalysis <- R6Class(
       } else {
         start_row <- self$find_first_occurrence(df, "Treatment Averages")
         end_row <- self$find_first_occurrence(df, "Well Averages") - 1
-        
+
         df_treatment_averages <- self$subset_by_range(df, start_row, end_row)
-        
+
         new_df_treatment_averages <- df_treatment_averages %>%
           separate(
             `Investigator:`,
@@ -145,22 +145,22 @@ BatchMEAnalysis <- R6Class(
             sep = ",",
             fill = "right"
           )
-        
+
         new_df_treatment_averages <- new_df_treatment_averages %>%
           select_if(~ all(!is.na(.)))
-        
+
         new_df_treatment_averages <- as.data.frame(new_df_treatment_averages)
-        
+
         rownames(new_df_treatment_averages) <- new_df_treatment_averages[, 1]
         new_df_treatment_averages <- new_df_treatment_averages[, -1]
         colnames(new_df_treatment_averages) <- new_df_treatment_averages[1, ]
         new_df_treatment_averages <- new_df_treatment_averages[-1, ]
         new_df_treatment_averages <- new_df_treatment_averages[, colnames(new_df_treatment_averages) != ""]
-        
+
         return(new_df_treatment_averages)
       }
     },
-    
+
     #' @description
     #' Generate Time Comparison Plots
     #'
@@ -171,23 +171,23 @@ BatchMEAnalysis <- R6Class(
     #' @param control_condition Optional. The control condition to highlight in the plot.
     #' @param title Optional. The title of the plot.
     #' @return A ggplot object.
-    #' 
-    
-    
-    time_comparison_plots = function(data_list, conditions, metric, control_condition = NULL, title = NULL) {  # Function to plot time comparison for multiple conditions
+    #'
+
+
+    time_comparison_plots = function(data_list, conditions, metric, control_condition = NULL, title = NULL) { # Function to plot time comparison for multiple conditions
       combined_df <- bind_rows(data_list)
       filtered_df <- combined_df %>% filter(Sample %in% conditions)
-      
+
       # Reorder the samples to have the control condition at the top, if specified
       if (!is.null(control_condition) && control_condition %in% filtered_df$Sample) {
         filtered_df$Sample <- factor(filtered_df$Sample, levels = c(control_condition, setdiff(conditions, control_condition)))
       }
-      
+
       # Remove the ".csv" suffix from the FileName
       filtered_df$FileName <- gsub("\\.csv$", "", filtered_df$FileName)
-      
+
       if (is.null(title)) {
-        title = ""
+        title <- ""
       }
       p <- ggplot(filtered_df, aes(x = FileName, y = Avg, fill = Sample)) +
         geom_bar(stat = "identity", position = "dodge", fill = "grey80", color = "black", size = 0.5) +
@@ -206,14 +206,14 @@ BatchMEAnalysis <- R6Class(
           panel.border = element_blank(),
           axis.line = element_line(size = 1)
         ) +
-        facet_wrap(~ Sample, ncol = 1)+
+        facet_wrap(~Sample, ncol = 1) +
         ggtitle(title)
-      
+
       p <- p + scale_x_discrete(limits = unique(filtered_df$FileName))
       print(p)
       return(p)
     },
-    
+
     #' @description
     #' Run MEA Analysis
     #'
@@ -223,20 +223,20 @@ BatchMEAnalysis <- R6Class(
     #' @param control_condition Optional. The control condition to compare against.
     #' @param title Optional. The title of the plot.
     #' @return A ggplot object.
-    #' 
-  
-    run_mea_analysis = function(conditions, metric, control_condition = NULL, title = NULL) {  # Main function to run the analysis
+    #'
+
+    run_mea_analysis = function(conditions, metric, control_condition = NULL, title = NULL) { # Main function to run the analysis
       data_list <- lapply(self$file_paths, function(path) {
         data <- self$process_file(path, metric)
         return(data)
       })
-      
+
       data_list <- data_list[!sapply(data_list, is.null)]
       combined_data <- bind_rows(data_list)
       plot <- self$time_comparison_plots(list(combined_data), conditions, metric, control_condition, title)
       print(plot)
     },
-    
+
     #' @description
     #' Generate Significance Overview
     #'
@@ -246,71 +246,74 @@ BatchMEAnalysis <- R6Class(
     #' @param metrics_to_visualize Optional. Specific metrics to visualize.
     #' @param title The title of the heatmap.
     #' @return A significance overview table.
-  
+
     generate_significance_overview = function(control_group, groups_to_include = NULL, metrics_to_visualize = NULL, title) {
-      file_list = self$file_paths
-      
+      file_list <- self$file_paths
+
       # Function to process a single file
       process_file <- function(file) {
-        tryCatch({
-          df <- read_csv(file, show_col_types = FALSE)
-          df_treatment_averages <- self$get_treatment_averages(df)
-          samples <- self$get_treatment_list(df)
-          if (is.null(groups_to_include)) {
-            samples_to_analyze <- samples
-          } else {
-            # Include only the specified groups, including the control group if it's in the list
-            samples_to_analyze <- intersect(samples, groups_to_include)
+        tryCatch(
+          {
+            df <- read_csv(file, show_col_types = FALSE)
+            df_treatment_averages <- self$get_treatment_averages(df)
+            samples <- self$get_treatment_list(df)
+            if (is.null(groups_to_include)) {
+              samples_to_analyze <- samples
+            } else {
+              # Include only the specified groups, including the control group if it's in the list
+              samples_to_analyze <- intersect(samples, groups_to_include)
+            }
+
+            # Filter the treatment averages by the samples to analyze
+            df_treatment_averages <- df_treatment_averages[, c(samples_to_analyze)]
+            print(df_treatment_averages)
+
+            # Filter metrics if specified
+            if (!is.null(metrics_to_visualize)) {
+              metric_lookup <- setNames(
+                gsub(" - Avg| - Std", "", rownames(df_treatment_averages)),
+                rownames(df_treatment_averages)
+              )
+
+              # Filter rows based on the lookup table
+              rows_to_keep <- names(metric_lookup)[metric_lookup %in% metrics_to_visualize]
+              rows_to_keep <- c(rows_to_keep, "Total Wells")
+              df_treatment_averages <- df_treatment_averages[rows_to_keep, ]
+            }
+
+            t_test_results <- self$perform_t_tests(df_treatment_averages, control_group)
+            # Exclude the control group from the results
+            t_test_results <- t_test_results %>% filter(Treatment != control_group)
+            print(t_test_results)
+            file_name <- basename(file)
+            t_test_results$File <- file_name
+            return(t_test_results)
+          },
+          error = function(e) {
+            warning(paste("Error processing file", file, ":", e$message))
+            return(NULL)
           }
-          
-          # Filter the treatment averages by the samples to analyze
-          df_treatment_averages <- df_treatment_averages[, c(samples_to_analyze)]
-          print(df_treatment_averages)
-          
-          # Filter metrics if specified
-          if (!is.null(metrics_to_visualize)) {
-            metric_lookup <- setNames(
-              gsub(" - Avg| - Std", "", rownames(df_treatment_averages)),
-              rownames(df_treatment_averages)
-            )
-            
-            # Filter rows based on the lookup table
-            rows_to_keep <- names(metric_lookup)[metric_lookup %in% metrics_to_visualize]
-            rows_to_keep <- c(rows_to_keep, 'Total Wells')
-            df_treatment_averages <- df_treatment_averages[rows_to_keep, ]
-          }
-          
-          t_test_results <- self$perform_t_tests(df_treatment_averages, control_group)
-          # Exclude the control group from the results
-          t_test_results <- t_test_results %>% filter(Treatment != control_group)
-          print(t_test_results)
-          file_name <- basename(file)
-          t_test_results$File <- file_name
-          return(t_test_results)
-        }, error = function(e) {
-          warning(paste("Error processing file", file, ":", e$message))
-          return(NULL)
-        })
+        )
       }
-      
+
       all_results <- map_df(file_list, process_file)
-      
+
       if (nrow(all_results) == 0) {
         stop("No valid results were obtained from any of the input files.")
       }
-      
+
       significance_table <- all_results %>%
         mutate(
           Significance = P.Value * sign(Treatment_Mean - Control_Mean),
           Heat = ((-log10(P.Value)) * sign(Treatment_Mean - Control_Mean))
         ) %>%
         mutate(Mean_Difference = Treatment_Mean - Control_Mean)
-      
+
       # Apply metric filter if provided
       if (!is.null(metrics_to_visualize)) {
         significance_table <- significance_table %>% filter(Metric %in% metrics_to_visualize)
       }
-      
+
       significance_table <- significance_table %>%
         select(File, Treatment, Metric, Significance, Heat, Control_Mean, Treatment_Mean, Mean_Difference) %>%
         pivot_wider(
@@ -319,7 +322,7 @@ BatchMEAnalysis <- R6Class(
           names_glue = "{File}_{.value}"
         ) %>%
         arrange(Treatment, Metric)
-      
+
       # Prepare data for heatmap (excluding the control group)
       heatmap_data <- significance_table %>%
         pivot_longer(
@@ -329,16 +332,17 @@ BatchMEAnalysis <- R6Class(
         ) %>%
         mutate(
           File = sub("_Heat$", "", File),
-          File = sub("\\.csv$", "", File),  # Remove the .csv suffix
+          File = sub("\\.csv$", "", File), # Remove the .csv suffix
           Heat = map_dbl(Heat, ~ ifelse(is.list(.x), unlist(.x)[1], as.numeric(.x)))
         )
-      
+
       # Reorder the Treatment levels to exclude the control group
       heatmap_data <- heatmap_data %>%
         filter(Treatment != control_group) %>%
         mutate(Treatment = factor(Treatment,
-                                  levels = setdiff(unique(Treatment), control_group)))
-      
+          levels = setdiff(unique(Treatment), control_group)
+        ))
+
       # Create heatmap
       heatmap <- ggplot(heatmap_data, aes(x = File, y = fct_rev(interaction(Treatment, Metric)), fill = Heat)) +
         geom_tile() +
@@ -351,13 +355,15 @@ BatchMEAnalysis <- R6Class(
           na.value = "grey50",
           name = "Heat\n(-log10(p-value))"
         ) +
-        geom_text(aes(label = case_when(
-          abs(Heat) >= 3 ~ "***",
-          abs(Heat) >= 2 ~ "**",
-          abs(Heat) >= 1.30103 ~ "*",
-          TRUE ~ ""
-        )),
-        size = 3) +
+        geom_text(
+          aes(label = case_when(
+            abs(Heat) >= 3 ~ "***",
+            abs(Heat) >= 2 ~ "**",
+            abs(Heat) >= 1.30103 ~ "*",
+            TRUE ~ ""
+          )),
+          size = 3
+        ) +
         theme_minimal() +
         theme(
           axis.text.x = element_text(angle = 45, hjust = 1),
@@ -367,11 +373,37 @@ BatchMEAnalysis <- R6Class(
           panel.grid.minor = element_blank()
         ) +
         labs(title = title)
-      
+
       print(heatmap)
-      
+
       return(significance_table)
+    },
+
+    #' @description
+    #' Rename Treatment Across Batch
+    #'
+    #' This method renames a treatment across all files in the batch.
+    #' @param original_name The original name of the treatment.
+    #' @param new_name The new name for the treatment.
+    #' @return A list of boolean values indicating success for each file.
+    #' @export
+    rename_treatment_batch = function(original_name, new_name) {
+      results <- lapply(self$file_paths, function(file_path) {
+        mea_analysis <- MEAnalysis$new(file_path)
+        result <- mea_analysis$rename_treatment(original_name, new_name)
+        if (result) {
+          # Update the file with the new treatment name
+          write_csv(mea_analysis$raw_df, file_path)
+        }
+        return(result)
+      })
+
+      success_count <- sum(unlist(results))
+      total_files <- length(self$file_paths)
+
+      message(sprintf("Renamed treatment in %d out of %d files.", success_count, total_files))
+
+      return(results)
     }
-    
   )
 )
