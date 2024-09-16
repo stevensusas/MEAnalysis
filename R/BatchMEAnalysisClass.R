@@ -388,19 +388,20 @@ BatchMEAnalysis <- R6Class(
     #' @return A list of boolean values indicating success for each file.
     #' @export
     rename_treatment_batch = function(original_name, new_name) {
-      results <- lapply(self$file_paths, function(file_path) {
-        mea_analysis <- MEAnalysis$new(file_path)
-        result <- mea_analysis$rename_treatment(original_name, new_name)
-        if (result) {
-          # Update the file with the new treatment name
-          write_csv(mea_analysis$raw_df, file_path)
+      results <- lapply(self$data_list, function(item) {
+        df <- item$data
+        treatment_averages <- self$get_treatment_averages(df)
+        if (original_name %in% colnames(treatment_averages)) {
+          colnames(treatment_averages)[colnames(treatment_averages) == original_name] <- new_name
+          df <- self$update_treatment_averages(df, treatment_averages)
+          item$data <- df
+          return(TRUE)
         }
-        return(result)
+        return(FALSE)
       })
 
       success_count <- sum(unlist(results))
-      total_files <- length(self$file_paths)
-
+      total_files <- length(self$data_list)
       message(sprintf("Renamed treatment in %d out of %d files.", success_count, total_files))
 
       return(results)
