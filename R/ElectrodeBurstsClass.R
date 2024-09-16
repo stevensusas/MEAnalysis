@@ -347,8 +347,18 @@ ElectrodeBursts <- R6Class(
         stop("The 'Well' assignment column cannot be renamed.")
       }
       
-      # Rename the column
+      # Get the current number of columns
+      original_col_length <- length(colnames(self$assignments))
+      
+      # Proceed with renaming the column
       colnames(self$assignments)[colnames(self$assignments) == original_sample_name] <- new_sample_name
+      
+      # Ensure the column length remains the same after renaming
+      new_col_length <- length(colnames(self$assignments))
+      
+      if (original_col_length != new_col_length) {
+        stop("Error: The number of columns changed during the renaming process. Renaming aborted.")
+      }
       
       message(paste("Sample name", original_sample_name, "has been renamed to", new_sample_name, "."))
       
