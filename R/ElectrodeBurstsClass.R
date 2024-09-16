@@ -328,39 +328,33 @@ ElectrodeBursts <- R6Class(
     },
 
     #' @description
-    #' Rename Sample Column
+    #' Rename Treatment Name
     #' 
-    #' This method renames the specified column with the original sample name 
-    #' to the new sample name in the assignments data frame while ensuring well assignments remain intact.
-    #' @param original_sample_name The original sample name to search for in the column names.
-    #' @param new_sample_name The new sample name to replace the original one.
-    #' @return The modified assignments data frame with renamed column.
+    #' This method renames a treatment name in the 'assignments' data frame 
+    #' without affecting the well column.
+    #' @param original_treatment_name The original treatment name to search for.
+    #' @param new_treatment_name The new treatment name to replace the original one.
+    #' @return The modified assignments data frame with the renamed treatment.
     #' @export
-    rename_sample_column = function(original_sample_name, new_sample_name) {
-      # Check if the original sample name exists in the column names
-      if (!(original_sample_name %in% colnames(self$assignments))) {
-        stop(paste("Sample name", original_sample_name, "not found in the assignments data frame."))
+    rename_treatment_name = function(original_treatment_name, new_treatment_name) {
+      # Ensure the 'Treatment' row exists in the assignments data frame
+      if (!"Treatment" %in% self$assignments$Well) {
+        stop("The 'Treatment' row does not exist in the assignments data frame.")
       }
       
-      # Ensure that the Well assignment column is untouched
-      if (original_sample_name == "Well") {
-        stop("The 'Well' assignment column cannot be renamed.")
+      # Get the row that contains treatments
+      treatment_row <- self$assignments[self$assignments$Well == "Treatment", ]
+      
+      # Check if the original treatment exists in the treatment row
+      if (!(original_treatment_name %in% treatment_row)) {
+        stop(paste("Treatment name", original_treatment_name, "not found in the assignments data frame."))
       }
       
-      # Get the current number of columns
-      original_col_length <- length(colnames(self$assignments))
+      # Rename the treatment
+      treatment_columns <- names(treatment_row)[treatment_row == original_treatment_name]
+      self$assignments[self$assignments$Well == "Treatment", treatment_columns] <- new_treatment_name
       
-      # Proceed with renaming the column
-      colnames(self$assignments)[colnames(self$assignments) == original_sample_name] <- new_sample_name
-      
-      # Ensure the column length remains the same after renaming
-      new_col_length <- length(colnames(self$assignments))
-      
-      if (original_col_length != new_col_length) {
-        stop("Error: The number of columns changed during the renaming process. Renaming aborted.")
-      }
-      
-      message(paste("Sample name", original_sample_name, "has been renamed to", new_sample_name, "."))
+      message(paste("Treatment name", original_treatment_name, "has been renamed to", new_treatment_name, "."))
       
       return(self$assignments) # Return the updated assignments data frame
     }
