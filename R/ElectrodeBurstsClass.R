@@ -352,33 +352,6 @@ ElectrodeBursts <- R6Class(
       message(sprintf("Renamed treatment in %d out of %d files.", success_count, total_files))
 
       return(results)
-    },
-
-    #' @description
-    #' Rename Treatment Across Batch
-    #'
-    #' This method renames a treatment across all files in the batch.
-    #' @param original_name The original name of the treatment.
-    #' @param new_name The new name for the treatment.
-    #' @return A list of boolean values indicating success for each file.
-    #' @export
-    rename_treatment_batch = function(original_name, new_name) {
-      results <- lapply(self$file_paths, function(file_path) {
-        mea_analysis <- MEAnalysis$new(file_path)
-        result <- mea_analysis$rename_treatment(original_name, new_name)
-        if (result) {
-          # Update the file with the new treatment name
-          write_csv(mea_analysis$raw_df, file_path)
-        }
-        return(result)
-      })
-
-      success_count <- sum(unlist(results))
-      total_files <- length(self$file_paths)
-
-      message(sprintf("Renamed treatment in %d out of %d files.", success_count, total_files))
-
-      return(results)
     }
   )
 )
