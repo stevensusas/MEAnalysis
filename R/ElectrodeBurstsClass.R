@@ -328,30 +328,31 @@ ElectrodeBursts <- R6Class(
     },
 
     #' @description
-    #' Rename Treatment Across Batch
-    #'
-    #' This method renames a treatment across all files in the batch.
-    #' @param original_name The original name of the treatment.
-    #' @param new_name The new name for the treatment.
-    #' @return A list of boolean values indicating success for each file.
+    #' Rename Sample Column
+    #' 
+    #' This method renames the specified column with the original sample name 
+    #' to the new sample name in the assignments data frame while ensuring well assignments remain intact.
+    #' @param original_sample_name The original sample name to search for in the column names.
+    #' @param new_sample_name The new sample name to replace the original one.
+    #' @return The modified assignments data frame with renamed column.
     #' @export
-    rename_treatment_batch = function(original_name, new_name) {
-      results <- lapply(self$file_paths, function(file_path) {
-        mea_analysis <- MEAnalysis$new(file_path)
-        result <- mea_analysis$rename_treatment(original_name, new_name)
-        if (result) {
-          # Update the file with the new treatment name
-          write_csv(mea_analysis$raw_df, file_path)
-        }
-        return(result)
-      })
-
-      success_count <- sum(unlist(results))
-      total_files <- length(self$file_paths)
-
-      message(sprintf("Renamed treatment in %d out of %d files.", success_count, total_files))
-
-      return(results)
+    rename_sample_column = function(original_sample_name, new_sample_name) {
+      # Check if the original sample name exists in the column names
+      if (!(original_sample_name %in% colnames(self$assignments))) {
+        stop(paste("Sample name", original_sample_name, "not found in the assignments data frame."))
+      }
+      
+      # Ensure that the Well assignment column is untouched
+      if (original_sample_name == "Well") {
+        stop("The 'Well' assignment column cannot be renamed.")
+      }
+      
+      # Rename the column
+      colnames(self$assignments)[colnames(self$assignments) == original_sample_name] <- new_sample_name
+      
+      message(paste("Sample name", original_sample_name, "has been renamed to", new_sample_name, "."))
+      
+      return(self$assignments) # Return the updated assignments data frame
     }
   )
 )
