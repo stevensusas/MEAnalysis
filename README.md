@@ -2,6 +2,8 @@
 
 This package provides tools for analyzing Microelectrode Array (MEA) data. It includes three main classes: `MEAnalysis`, `BatchMEAnalysis`, and `ElectrodeBursts`.
 
+For examples on how to use the package, see the scripts in the ```/main``` directory.
+
 ## Installation
 
 To install the MEA Analysis package, you can use the devtools package in R. If you don't have devtools installed, you can install it first:
